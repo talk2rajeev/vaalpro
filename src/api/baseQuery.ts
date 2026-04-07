@@ -3,8 +3,9 @@ import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolk
 
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_URL || 'https://jsonplaceholder.typicode.com',
-  prepareHeaders: (headers) => {
-    const token = localStorage.getItem('token');
+  prepareHeaders: (headers, { getState }) => {
+    // By default, try to get the token from the Redux state
+    const token = (getState() as any).auth.accessToken;
     if (token) {
       headers.set('authorization', `Bearer ${token}`);
     }

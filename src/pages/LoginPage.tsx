@@ -2,23 +2,37 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Lock, User, ShieldCheck } from 'lucide-react';
 import { useDispatch } from 'react-redux';
-import { login } from '../features/auth/authSlice';
+import { setCredentials } from '../features/auth/authSlice';
+import { useLoginMutation } from '../features/auth/authApi';
 import { useNavigate } from 'react-router-dom';
 
 export const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [login, { isLoading }] = useLoginMutation();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (username === 'testuser' && password === 'testpassword') {
-      dispatch(login(username));
+    try {
+      const userData = await login({ username, password }).unwrap();
+      // Assume the API returns { accessToken: '...' }
+      // We'll use the username as the user for now
+      dispatch(setCredentials({ user: username, accessToken: userData.accessToken }));
       navigate('/dashboard');
-    } else {
-      setError('Invalid username or password');
+    } catch (err: any) {
+      if (!err?.status) {
+        setErrorMsg('No Server Response');
+      } else if (err.status === 400) {
+        setErrorMsg('Missing Username or Password');
+      } else if (err.status === 401) {
+        setErrorMsg('Unauthorized');
+      } else {
+        setErrorMsg('Login Failed');
+      }
     }
   };
 
@@ -68,21 +82,22 @@ export const LoginPage: React.FC = () => {
             </div>
           </div>
 
-          {error && (
+          {errorMsg && (
             <motion.p 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="text-red-500 text-sm text-center font-medium"
             >
-              {error}
+              {errorMsg}
             </motion.p>
           )}
 
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98]"
+            disabled={isLoading}
+            className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98] ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            Sign In
+            {isLoading ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
 
