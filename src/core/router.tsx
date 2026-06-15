@@ -5,8 +5,11 @@ import {
   RouterProvider,
 } from 'react-router';
 import type { RouteObject } from 'react-router';
-import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '@/store/store';
+import { useRefreshMutation } from '@/features/auth/authApi';
+import { logout, setCredentials } from '@/features/auth/authSlice';
 import LoginPage from '@/apps/portal/pages/LoginPage';
 import VaalproDashboardPage from '@/apps/portal/pages/VaalproDashboardPage';
 import CaaldocDashboardPage from '@/apps/caaldoc/pages/CaaldocDashboardPage';
@@ -15,10 +18,35 @@ import AuditLogPage from '@/apps/caaldoc/pages/AuditLogPage';
 import SettingsPage from '@/apps/caaldoc/pages/SettingsPage';
 import VaaldocComingSoonPage from '@/apps/vaaldoc/pages/VaaldocComingSoonPage';
 
-const ProtectedLayout = () => {
-  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+let sessionRestorePromise: Promise<void> | null = null;
 
-  if (!isAuthenticated) {
+const ProtectedLayout = () => {
+  const dispatch = useDispatch();
+  const { isAuthenticated, isAuthChecked } = useSelector((state: RootState) => state.auth);
+  const [refresh, { isLoading }] = useRefreshMutation();
+
+  useEffect(() => {
+    if (isAuthenticated || isAuthChecked || isLoading || sessionRestorePromise) {
+      return;
+    }
+
+    sessionRestorePromise = (async () => {
+      try {
+        const userData = await refresh().unwrap();
+        dispatch(setCredentials({ user: userData.user ?? null, accessToken: userData.accessToken }));
+      } catch {
+        dispatch(logout());
+      } finally {
+        sessionRestorePromise = null;
+      }
+    })();
+  }, [dispatch, isAuthChecked, isAuthenticated, isLoading, refresh]);
+
+  if (!isAuthenticated && !isAuthChecked) {
+    return null;
+  }
+
+  if (!isAuthenticated && isAuthChecked) {
     return <Navigate to="/login" replace />;
   }
 

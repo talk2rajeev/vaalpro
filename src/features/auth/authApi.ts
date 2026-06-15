@@ -6,6 +6,7 @@ type LoginCredentials = {
 };
 
 type LoginResponse = {
+  user?: string | null;
   accessToken: string;
 };
 
@@ -18,7 +19,13 @@ export const authApi = apiSlice.injectEndpoints({
         body: credentials,
       }),
     }),
+    refresh: builder.mutation<LoginResponse, void>({
+      query: () => ({
+        url: '/auth/refresh',
+        method: 'POST',
+      }),
+    }),
   }),
 });
 
-export const { useLoginMutation } = authApi;
+export const { useLoginMutation, useRefreshMutation } = authApi;

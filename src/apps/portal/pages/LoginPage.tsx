@@ -28,7 +28,7 @@ export const LoginPage: React.FC = () => {
     e.preventDefault();
     try {
       const userData = await login({ username, password }).unwrap();
-      dispatch(setCredentials({ user: username, accessToken: userData.accessToken }));
+      dispatch(setCredentials({ user: userData.user ?? username, accessToken: userData.accessToken }));
       navigate('/dashboard', { replace: true });
     } catch (err: unknown) {
       if (!isLoginError(err) || !err.status) {

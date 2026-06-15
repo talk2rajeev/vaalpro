@@ -5,32 +5,32 @@ interface AuthState {
   user: string | null;
   accessToken: string | null;
   isAuthenticated: boolean;
+  isAuthChecked: boolean;
 }
 
 const initialState: AuthState = {
-  user: localStorage.getItem('user'),
-  accessToken: localStorage.getItem('accessToken'),
-  isAuthenticated: !!localStorage.getItem('accessToken'),
+  user: null,
+  accessToken: null,
+  isAuthenticated: false,
+  isAuthChecked: false,
 };
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setCredentials(state, action: PayloadAction<{ user: string; accessToken: string }>) {
+    setCredentials(state, action: PayloadAction<{ user: string | null; accessToken: string }>) {
       const { user, accessToken } = action.payload;
       state.user = user;
       state.accessToken = accessToken;
       state.isAuthenticated = true;
-      localStorage.setItem('user', user);
-      localStorage.setItem('accessToken', accessToken);
+      state.isAuthChecked = true;
     },
     logout(state) {
       state.user = null;
       state.accessToken = null;
       state.isAuthenticated = false;
-      localStorage.removeItem('user');
-      localStorage.removeItem('accessToken');
+      state.isAuthChecked = true;
     },
   },
 });
