@@ -11,6 +11,8 @@ import {
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { logout } from '@/features/auth/authSlice';
+import DashboardHeader from '@/apps/shared/components/DashboardHeader';
+
 
 type AppStatus = 'ACTIVE' | 'SCHEDULED' | 'SECURE' | 'MAINTENANCE';
 
@@ -88,55 +90,8 @@ const VaalproDashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-800 antialiased">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <button
-            type="button"
-            onClick={() => navigate('/dashboard')}
-            className="flex items-center"
-            aria-label="Vaalpro dashboard"
-          >
-            <img src="/images/vaalpro-logo.png" alt="Vaalpro" className="h-auto w-40" />
-          </button>
-
-          <nav className="hidden items-center gap-2 md:flex">
-            {['Dashboard', 'Inventory', 'Validation', 'Reports'].map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => setActiveTab(item)}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  activeTab === item
-                    ? 'bg-[#1E4E8C] text-white'
-                    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
-                }`}
-              >
-                {item}
-              </button>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              className="relative rounded-full border border-slate-200 p-2 text-slate-500 hover:bg-slate-50"
-              aria-label="Notifications"
-            >
-              <Bell className="h-5 w-5" />
-              <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#E88500]" />
-            </button>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="rounded-full border border-slate-200 p-2 text-slate-500 hover:bg-slate-50"
-              aria-label="Logout"
-            >
-              <LogOut className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
-      </header>
-
+      <DashboardHeader showLogo />
+      
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <section className="mb-10 grid gap-8 lg:grid-cols-[1fr_360px] lg:items-end">
           <div className="max-w-3xl">

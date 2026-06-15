@@ -1,6 +1,6 @@
 export const MOCK_PHARMA = [
-  { id: 'PH-001', name: 'Global Pharma Corp' },
-  { id: 'PH-002', name: 'BioHealth Solutions' },
+  { id: 'PH-001', name: 'Global Pharma Corp', location: 'Jigni, Bangalore' },
+  { id: 'PH-002', name: 'BioHealth Solutions' , location: 'Hyderabad'},
 ];
 
 export const MOCK_PLANTS = [
