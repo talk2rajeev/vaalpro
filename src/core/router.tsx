@@ -14,6 +14,7 @@ import PlantDetailsPage from '@/apps/caaldoc/pages/PlantDetailsPage';
 import AuditLogPage from '@/apps/caaldoc/pages/AuditLogPage';
 import SettingsPage from '@/apps/caaldoc/pages/SettingsPage';
 import VaaldocComingSoonPage from '@/apps/vaaldoc/pages/VaaldocComingSoonPage';
+import VaalproDashboardPage from '@/apps/vaalpro/pages/VaalproDashboardPage';
 
 const ProtectedLayout = () => {
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
@@ -60,6 +61,10 @@ const routes = [
       {
         path: '/vaaldoc',
         element: <VaaldocComingSoonPage />,
+      },
+      {
+        path: '/vaalpro/dashboard',
+        element: <VaalproDashboardPage />,
       },
     ],
   },
