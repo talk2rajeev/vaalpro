@@ -7,8 +7,8 @@ import {
 import type { RouteObject } from 'react-router';
 import { useSelector } from 'react-redux';
 import type { RootState } from '@/store/store';
-import DashboardPage from '@/apps/portal/pages/DashboardPage';
 import LoginPage from '@/apps/portal/pages/LoginPage';
+import VaalproDashboardPage from '@/apps/portal/pages/VaalproDashboardPage';
 import CaaldocDashboardPage from '@/apps/caaldoc/pages/CaaldocDashboardPage';
 import PlantDetailsPage from '@/apps/caaldoc/pages/PlantDetailsPage';
 import AuditLogPage from '@/apps/caaldoc/pages/AuditLogPage';
@@ -31,15 +31,15 @@ const routes = [
     element: <LoginPage />,
   },
   {
+    path: '/',
+    element: <Navigate to="/login" replace />,
+  },
+  {
     element: <ProtectedLayout />,
     children: [
       {
-        path: '/',
-        element: <Navigate to="/dashboard" replace />,
-      },
-      {
         path: '/dashboard',
-        element: <DashboardPage />,
+        element: <VaalproDashboardPage />,
       },
       {
         path: '/caaldoc/dashboard',
@@ -61,11 +61,11 @@ const routes = [
         path: '/vaaldoc',
         element: <VaaldocComingSoonPage />,
       },
+      {
+        path: '*',
+        element: <Navigate to="/dashboard" replace />,
+      },
     ],
-  },
-  {
-    path: '*',
-    element: <Navigate to="/dashboard" replace />,
   },
 ] satisfies RouteObject[];
 

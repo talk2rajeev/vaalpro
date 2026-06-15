@@ -29,7 +29,7 @@ export const LoginPage: React.FC = () => {
     try {
       const userData = await login({ username, password }).unwrap();
       dispatch(setCredentials({ user: username, accessToken: userData.accessToken }));
-      navigate('/dashboard');
+      navigate('/dashboard', { replace: true });
     } catch (err: unknown) {
       if (!isLoginError(err) || !err.status) {
         setErrorMsg('No Server Response');
