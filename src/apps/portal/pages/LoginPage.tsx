@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Lock, User, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Lock, User, CheckCircle2 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '@/features/auth/authSlice';
 import { useLoginMutation } from '@/features/auth/authApi';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/core-components/button';
 
 type LoginError = {
   status?: number;
@@ -61,12 +61,11 @@ export const LoginPage: React.FC = () => {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="hidden lg:flex flex-col flex-1 text-white pr-12"
         >
-          <div className="flex items-center gap-4 mb-8">
-            <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-              <ShieldCheck className="text-white w-8 h-8" />
-            </div>
-            <span className="text-3xl font-bold tracking-tight">Valdoc</span>
-          </div>
+          <img
+            src="/images/vaalpro-logo.png"
+            alt="Vaalpro"
+            className="mb-8 h-auto w-72"
+          />
           
           <h2 className="text-6xl font-extrabold leading-tight mb-6 bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
             Precision in <br /> Pharma Compliance
@@ -102,10 +101,11 @@ export const LoginPage: React.FC = () => {
           className="w-full max-w-[420px] bg-white/95 backdrop-blur-md rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-10 flex flex-col items-center border border-white/20"
         >
           <div className="flex lg:hidden flex-col items-center mb-10 w-full text-center">
-            <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-blue-500/20">
-              <ShieldCheck className="text-white w-10 h-10" />
-            </div>
-            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Valdoc</h1>
+            <img
+              src="/images/vaalpro-logo.png"
+              alt="Vaalpro"
+              className="h-auto w-64 max-w-full"
+            />
           </div>
 
           <div className="text-left w-full mb-8">

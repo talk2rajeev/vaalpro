@@ -39,12 +39,11 @@ const DashboardPage: React.FC = () => {
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-slate-200 flex flex-col">
         <div className="p-6 border-b border-slate-100">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-md shadow-blue-100">
-              <CheckCircle2 className="text-white w-5 h-5" />
-            </div>
-            <span className="text-xl font-bold text-slate-900">Valdoc</span>
-          </div>
+          <img
+            src="/images/vaalpro-logo.png"
+            alt="Vaalpro"
+            className="h-auto w-36"
+          />
         </div>
 
         <nav className="flex-1 p-4 space-y-2">

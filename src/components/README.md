@@ -1,2 +1,2 @@
 # SHARED UI (Generic/Reusable)
-Reusable UI elements, charts, and form builders.
+Reusable custom UI elements, charts, and form builders and core components (button, card etc).
