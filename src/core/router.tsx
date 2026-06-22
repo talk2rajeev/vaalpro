@@ -17,8 +17,34 @@ import PlantDetailsPage from '@/apps/caaldoc/pages/PlantDetailsPage';
 import AuditLogPage from '@/apps/caaldoc/pages/AuditLogPage';
 import SettingsPage from '@/apps/caaldoc/pages/SettingsPage';
 import VaaldocComingSoonPage from '@/apps/vaaldoc/pages/VaaldocComingSoonPage';
+import UnauthorizedAlert from '@/apps/shared/components/UnauthorizedAlert';
+import DashboardHeader from '@/apps/shared/components/DashboardHeader';
+import { CaaldocLayout } from '@/apps/caaldoc/pages/CaaldocLayout';
 
 let sessionRestorePromise: Promise<void> | null = null;
+
+
+const PermissionRoute = ({
+  permission,
+  children,
+}: {
+  permission: string;
+  children: React.ReactNode;
+}) => {
+
+  const permissions = useSelector(
+    (state: RootState) => state.auth.permissions
+  );
+
+  if (!permissions.includes(permission)) {
+    return <div>
+      <DashboardHeader showLogo/>
+      <UnauthorizedAlert title="Unauthorized" description="You do not have permission to view this resource." />;
+    </div>
+  }
+
+  return <>{children}</>;
+};
 
 const ProtectedLayout = () => {
   const dispatch = useDispatch();
@@ -67,23 +93,48 @@ const routes = [
     children: [
       {
         path: '/dashboard',
-        element: <VaalproDashboardPage />,
+        element: (
+          <PermissionRoute permission='vaalpro.dashboard.view'>
+            <VaalproDashboardPage />
+          </PermissionRoute>
+        ),
       },
       {
-        path: '/caaldoc/dashboard',
-        element: <CaaldocDashboardPage />,
-      },
-      {
-        path: '/caaldoc/plants/:id',
-        element: <PlantDetailsPage />,
-      },
-      {
-        path: '/caaldoc/audit',
-        element: <AuditLogPage />,
-      },
-      {
-        path: '/caaldoc/settings',
-        element: <SettingsPage />,
+        element: <CaaldocLayout />,
+        children: [
+          {
+            path: '/caaldoc/dashboard',
+            element: (
+              <PermissionRoute permission='caaldoc.dashboard.view'>
+                <CaaldocDashboardPage />
+              </PermissionRoute>
+            ),
+          },
+          {
+            path: '/caaldoc/plants/:id',
+            element: (
+              <PermissionRoute permission='caaldoc.plant.view'>
+                <PlantDetailsPage />
+              </PermissionRoute>
+            ),
+          },
+          {
+            path: '/caaldoc/audit',
+            element: (
+              <PermissionRoute permission='caaldoc.log.view'>
+                <AuditLogPage />
+              </PermissionRoute>
+            ),
+          },
+          {
+            path: '/caaldoc/settings',
+            element: (
+              <PermissionRoute permission='caaldoc.setting.view'>
+                <SettingsPage />
+              </PermissionRoute>
+            ),
+          },
+        ],
       },
       {
         path: '/vaaldoc',

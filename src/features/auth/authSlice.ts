@@ -6,6 +6,7 @@ interface AuthState {
   accessToken: string | null;
   isAuthenticated: boolean;
   isAuthChecked: boolean;
+  permissions: Array<string>
 }
 
 const initialState: AuthState = {
@@ -13,6 +14,7 @@ const initialState: AuthState = {
   accessToken: null,
   isAuthenticated: false,
   isAuthChecked: false,
+  permissions: ['vaalpro.dashboard.view', 'caaldoc.dashboard.view', 'caaldoc.plants.view'],
 };
 
 const authSlice = createSlice({

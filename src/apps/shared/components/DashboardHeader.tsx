@@ -1,12 +1,19 @@
 import React from 'react';
 import { Search, Bell } from 'lucide-react';
+import { useNavigate } from 'react-router';
 
 const DashboardHeader: React.FC<{showLogo?: boolean}> = ({showLogo}) => {
+  const navigate = useNavigate();
+
+  const navigateToVaalpro = () => {
+    navigate('/dashboard');
+  }
+
   return (
     <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8">
       <div className="flex items-center gap-8">
-        { showLogo && <img src="/images/vaalpro-logo.png" alt="Vaalpro Logo" className="h-10" />}
-        {/* <div className="relative w-96">
+        { showLogo && <img src="/images/vaalpro-logo.png" alt="Vaalpro Logo" className="h-10" onClick={navigateToVaalpro}/> }
+        {/* <div className="relative w-96">navigateToVaalpro
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
           <input
             type="text"

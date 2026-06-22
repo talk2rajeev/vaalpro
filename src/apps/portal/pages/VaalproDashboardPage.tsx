@@ -24,21 +24,11 @@ type AppConfig = {
   status: AppStatus;
   icon: typeof FileCheck2;
   route: string;
+  image: string;
   gradient: string;
 };
 
 const apps: AppConfig[] = [
-  {
-    id: 'vaaldoc',
-    title: 'Vaaldoc',
-    subtitle: 'Validation Lifecycle Manager',
-    description:
-      'End-to-end validation lifecycle management. Track document approvals and equipment calibration schedules in real time.',
-    status: 'ACTIVE',
-    icon: FileCheck2,
-    route: '/vaaldoc',
-    gradient: 'from-[#163D73] via-[#1E4E8C] to-[#2E6FB5]',
-  },
   {
     id: 'caaldoc',
     title: 'Caaldoc',
@@ -48,7 +38,20 @@ const apps: AppConfig[] = [
     status: 'ACTIVE',
     icon: Gauge,
     route: '/caaldoc/dashboard',
+    image: '/images/caaldoc-card.png',
     gradient: 'from-[#0F766E] via-[#11847D] to-[#21A99F]',
+  },
+  {
+    id: 'vaaldoc',
+    title: 'Vaaldoc',
+    subtitle: 'Validation Lifecycle Manager',
+    description:
+      'End-to-end validation lifecycle management. Track document approvals and equipment calibration schedules in real time.',
+    status: 'ACTIVE',
+    icon: FileCheck2,
+    route: '/vaaldoc',
+    image: '/images/vaaldoc-card.png',
+    gradient: 'from-[#163D73] via-[#1E4E8C] to-[#2E6FB5]',
   },
   {
     id: 'qdoc',
@@ -59,6 +62,7 @@ const apps: AppConfig[] = [
     status: 'SCHEDULED',
     icon: ClipboardCheck,
     route: '/dashboard',
+    image: '/images/qdoc.png',
     gradient: 'from-[#B96800] via-[#E88500] to-[#F6A92D]',
   },
 ];
@@ -144,6 +148,7 @@ const VaalproDashboardPage = () => {
                   className="flex min-h-[440px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md"
                 >
                   <div className={`relative aspect-[3/2] overflow-hidden bg-gradient-to-br ${app.gradient}`}>
+                    <img src={app.image} alt={app.title} className="absolute inset-0 w-full h-full object-cover" />
                     <span className="absolute right-4 top-4 z-10 flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-[#1E4E8C] shadow-sm">
                       <span
                         className={`h-1.5 w-1.5 rounded-full ${
@@ -158,10 +163,7 @@ const VaalproDashboardPage = () => {
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.25),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.16),transparent_45%)]" />
                     <div className="relative flex h-full flex-col justify-between p-6 text-white">
                       <app.icon className="h-12 w-12" />
-                      <div>
-                        <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] opacity-80">
-                          {app.id}-v2
-                        </p>
+                      <div className='flex flex-col items-center justify-center bg-black/50'>
                         <h3 className="mt-2 text-3xl font-black tracking-tight">{app.title}</h3>
                       </div>
                     </div>
