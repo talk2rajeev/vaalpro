@@ -14,14 +14,11 @@ import { logout } from '@/features/auth/authSlice';
 import DashboardHeader from '@/apps/shared/components/DashboardHeader';
 
 
-type AppStatus = 'ACTIVE' | 'SCHEDULED' | 'SECURE' | 'MAINTENANCE';
-
 type AppConfig = {
   id: 'vaaldoc' | 'caaldoc' | 'qdoc';
   title: string;
   subtitle: string;
   description: string;
-  status: AppStatus;
   icon: typeof FileCheck2;
   route: string;
   image: string;
@@ -35,7 +32,6 @@ const apps: AppConfig[] = [
     subtitle: 'Calibration Operations Hub',
     description:
       'Automated calibration and maintenance workflows. Ensure instrumentation meets global regulatory compliance standards.',
-    status: 'ACTIVE',
     icon: Gauge,
     route: '/caaldoc/dashboard',
     image: '/images/caaldoc-card.png',
@@ -47,7 +43,6 @@ const apps: AppConfig[] = [
     subtitle: 'Validation Lifecycle Manager',
     description:
       'End-to-end validation lifecycle management. Track document approvals and equipment calibration schedules in real time.',
-    status: 'ACTIVE',
     icon: FileCheck2,
     route: '/vaaldoc',
     image: '/images/vaaldoc-card.png',
@@ -59,7 +54,6 @@ const apps: AppConfig[] = [
     subtitle: 'Quality Document & Audit SOPs',
     description:
       'Quality management for protocol generation and peer-review audits. Centralize QMS and FDA-ready assets.',
-    status: 'SCHEDULED',
     icon: ClipboardCheck,
     route: '/dashboard',
     image: '/images/qdoc.png',
@@ -149,17 +143,6 @@ const VaalproDashboardPage = () => {
                 >
                   <div className={`relative aspect-[3/2] overflow-hidden bg-gradient-to-br ${app.gradient}`}>
                     <img src={app.image} alt={app.title} className="absolute inset-0 w-full h-full object-cover" />
-                    <span className="absolute right-4 top-4 z-10 flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-[#1E4E8C] shadow-sm">
-                      <span
-                        className={`h-1.5 w-1.5 rounded-full ${
-                          app.status === 'ACTIVE' || app.status === 'SECURE'
-                            ? 'bg-emerald-500'
-                            : 'bg-[#E88500]'
-                        }`}
-                      />
-                      {app.status}
-                    </span>
-
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.25),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.16),transparent_45%)]" />
                     <div className="relative flex h-full flex-col justify-between p-6 text-white">
                       <app.icon className="h-12 w-12" />
