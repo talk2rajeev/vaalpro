@@ -36,11 +36,13 @@ const PermissionRoute = ({
     (state: RootState) => state.auth.permissions
   );
 
-  if (!permissions.includes(permission)) {
-    return <div>
-      <DashboardHeader showLogo/>
-      <UnauthorizedAlert title="Unauthorized" description="You do not have permission to view this resource." />;
-    </div>
+  if (!permissions.some(p => p.permission?.name === permission)) {
+    return (
+      <div className="flex flex-col min-h-screen w-full">
+        <DashboardHeader showLogo />
+        <UnauthorizedAlert title="Unauthorized" description="You do not have permission to view this resource." />
+      </div>
+    )
   }
 
   return <>{children}</>;

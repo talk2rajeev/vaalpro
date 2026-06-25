@@ -1,4 +1,5 @@
 import { apiSlice } from '@/apps/shared/api/apiSlice';
+import type { UserPermission } from '@/features/auth/authSlice';
 
 type LoginCredentials = {
   username: string;
@@ -25,7 +26,10 @@ export const authApi = apiSlice.injectEndpoints({
         method: 'POST',
       }),
     }),
+    getUserPermissions: builder.query<UserPermission[], number>({
+      query: (userId) => `/userpermissions/${userId}`,
+    }),
   }),
 });
 
-export const { useLoginMutation, useRefreshMutation } = authApi;
+export const { useLoginMutation, useRefreshMutation, useGetUserPermissionsQuery } = authApi;

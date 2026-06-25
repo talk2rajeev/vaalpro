@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Lock, User, CheckCircle2 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
-import { setCredentials } from '@/features/auth/authSlice';
+import { setCredentials, setPermissions } from '@/features/auth/authSlice';
 import { useLoginMutation } from '@/features/auth/authApi';
+import { authApi } from '@/features/auth/authApi';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/core-components/button';
 
@@ -15,20 +16,78 @@ const isLoginError = (error: unknown): error is LoginError => {
   return typeof error === 'object' && error !== null && 'status' in error;
 };
 
+/** Decode a JWT without verifying signature — only for reading payload claims. */
+const decodeJwtPayload = (token: string): Record<string, unknown> | null => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const json = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + c.charCodeAt(0).toString(16).padStart(2, '0'))
+        .join('')
+    );
+    return JSON.parse(json) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+};
+
 export const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [isLoadingPermissions, setIsLoadingPermissions] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [login, { isLoading }] = useLoginMutation();
+  const [login, { isLoading: isLoggingIn }] = useLoginMutation();
+
+  const isLoading = isLoggingIn || isLoadingPermissions;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg('');
     try {
+      // Step 1: Authenticate
       const userData = await login({ username, password }).unwrap();
-      dispatch(setCredentials({ user: userData.user ?? username, accessToken: userData.accessToken }));
+
+      // Step 2: Decode the access token to extract userId
+      const payload = decodeJwtPayload(userData.accessToken);
+      const userId = typeof payload?.userId === 'number' ? payload.userId : null;
+
+      // Step 3: Store credentials (user stays on login page while permissions load)
+      dispatch(
+        setCredentials({
+          user: userData.user ?? username,
+          accessToken: userData.accessToken,
+          userId,
+        })
+      );
+
+      // Step 4: Fetch user permissions (blocking navigation until resolved)
+      if (userId !== null) {
+        setIsLoadingPermissions(true);
+        try {
+          const permissionsResult = await dispatch(
+            authApi.endpoints.getUserPermissions.initiate(userId, { forceRefetch: true })
+          );
+          if ('data' in permissionsResult && permissionsResult.data) {
+            dispatch(setPermissions(permissionsResult.data));
+          } else {
+            // Permissions fetch failed — dispatch empty array so isPermissionsLoaded is set
+            dispatch(setPermissions([]));
+          }
+        } catch {
+          dispatch(setPermissions([]));
+        } finally {
+          setIsLoadingPermissions(false);
+        }
+      } else {
+        dispatch(setPermissions([]));
+      }
+
+      // Step 5: Navigate only after permissions are resolved
       navigate('/dashboard', { replace: true });
     } catch (err: unknown) {
       if (!isLoginError(err) || !err.status) {
@@ -159,7 +218,11 @@ export const LoginPage: React.FC = () => {
               disabled={isLoading}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-[0_10px_20px_rgba(37,99,235,0.2)] transition-all transform active:scale-[0.98] mt-4 h-auto"
             >
-              {isLoading ? 'SIGNING IN...' : 'Sign In to Platform'}
+              {isLoggingIn
+                ? 'SIGNING IN...'
+                : isLoadingPermissions
+                ? 'LOADING PERMISSIONS...'
+                : 'Sign In to Platform'}
             </Button>
           </form>
 
