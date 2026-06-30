@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Lock, User, CheckCircle2 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
-import { setCredentials, setPermissions } from '@/features/auth/authSlice';
+import { setCredentials } from '@/features/auth/authSlice';
 import { useLoginMutation } from '@/features/auth/authApi';
-import { authApi } from '@/features/auth/authApi';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/core-components/button';
 
@@ -37,13 +36,12 @@ export const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
-  const [isLoadingPermissions, setIsLoadingPermissions] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [login, { isLoading: isLoggingIn }] = useLoginMutation();
 
-  const isLoading = isLoggingIn || isLoadingPermissions;
+  const isLoading = isLoggingIn;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,7 +54,8 @@ export const LoginPage: React.FC = () => {
       const payload = decodeJwtPayload(userData.accessToken);
       const userId = typeof payload?.userId === 'number' ? payload.userId : null;
 
-      // Step 3: Store credentials (user stays on login page while permissions load)
+      // Step 3: Store credentials. permission loading is owned by RequireAuth
+      // which gets the destination rout euntil permissions resolve.
       dispatch(
         setCredentials({
           user: userData.user ?? username,
@@ -65,29 +64,7 @@ export const LoginPage: React.FC = () => {
         })
       );
 
-      // Step 4: Fetch user permissions (blocking navigation until resolved)
-      if (userId !== null) {
-        setIsLoadingPermissions(true);
-        try {
-          const permissionsResult = await dispatch(
-            authApi.endpoints.getUserPermissions.initiate(userId, { forceRefetch: true })
-          );
-          if ('data' in permissionsResult && permissionsResult.data) {
-            dispatch(setPermissions(permissionsResult.data));
-          } else {
-            // Permissions fetch failed — dispatch empty array so isPermissionsLoaded is set
-            dispatch(setPermissions([]));
-          }
-        } catch {
-          dispatch(setPermissions([]));
-        } finally {
-          setIsLoadingPermissions(false);
-        }
-      } else {
-        dispatch(setPermissions([]));
-      }
-
-      // Step 5: Navigate only after permissions are resolved
+      // Step 4: Navigate; RequireAuth shows its koader while permissions load.
       navigate('/dashboard', { replace: true });
     } catch (err: unknown) {
       if (!isLoginError(err) || !err.status) {
@@ -219,9 +196,7 @@ export const LoginPage: React.FC = () => {
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-[0_10px_20px_rgba(37,99,235,0.2)] transition-all transform active:scale-[0.98] mt-4 h-auto"
             >
               {isLoggingIn
-                ? 'SIGNING IN...'
-                : isLoadingPermissions
-                ? 'LOADING PERMISSIONS...'
+                ? 'SIGNING IN...' 
                 : 'Sign In to Platform'}
             </Button>
           </form>
