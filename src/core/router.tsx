@@ -1,3 +1,4 @@
+import  type { ReactNode } from 'react';
 import {
   createBrowserRouter,
   Navigate,
@@ -23,7 +24,7 @@ const PermissionRoute = ({
   children,
 }: {
   permission: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) => {
 
   const allowdPermissionList = permission.split(',');

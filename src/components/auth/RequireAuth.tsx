@@ -5,26 +5,7 @@ import type { RootState } from '@/store/store';
 import { useRefreshMutation, useGetUserPermissionsQuery } from '@/features/auth/authApi';
 import { setCredentials, setPermissions, logout } from '@/features/auth/authSlice';
 import { Loader2 } from 'lucide-react';
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-/** Safely base64-decode a JWT payload without verifying the signature. */
-const decodeJwtPayload = (token: string): Record<string, unknown> | null => {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const json = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map((c) => '%' + c.charCodeAt(0).toString(16).padStart(2, '0'))
-        .join('')
-    );
-    return JSON.parse(json) as Record<string, unknown>;
-  } catch {
-    return null;
-  }
-};
+import { decodeJwtPayload } from '@/utils/jwt';
 
 // ---------------------------------------------------------------------------
 // RequireAuth
@@ -69,6 +50,12 @@ const RequireAuth = () => {
         const resolvedUserId =
           typeof payload?.userId === 'number' ? payload.userId : null;
 
+        // without a valid userId, we can't proceed to fetch permissions, so we log the user out
+        if (!resolvedUserId) {
+          dispatch(logout());
+          return;
+        }  
+
         dispatch(
           setCredentials({
             user: userData.user ?? null,
@@ -85,8 +72,11 @@ const RequireAuth = () => {
   // ------------------------------------------------------------------
   // Step 4: Fetch permissions once userId is available
   // ------------------------------------------------------------------
-  const { data: permissionsData, isSuccess: permissionsSuccess } =
-    useGetUserPermissionsQuery(userId!, { skip: !userId });
+  const { 
+    data: permissionsData, 
+    isSuccess: permissionsSuccess, 
+    isError: permissionsError,
+  } = useGetUserPermissionsQuery(userId!, { skip: !userId });
 
   // Step 5: Commit permissions to the store
   useEffect(() => {
@@ -94,6 +84,14 @@ const RequireAuth = () => {
       dispatch(setPermissions(permissionsData));
     }
   }, [permissionsSuccess, permissionsData, dispatch]);
+
+  // If permissions fails to load we cant make access decisions; end the 
+  // session rahter than leaving hte user stuck on the loader forever.
+  useEffect(() => {
+    if (permissionsError) {
+      dispatch(logout());
+    }
+  }, [permissionsError, dispatch]);
 
   // ------------------------------------------------------------------
   // UI States

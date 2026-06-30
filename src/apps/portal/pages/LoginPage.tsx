@@ -4,8 +4,9 @@ import { Lock, User, CheckCircle2 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '@/features/auth/authSlice';
 import { useLoginMutation } from '@/features/auth/authApi';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { Button } from '@/components/core-components/button';
+import { decodeJwtPayload } from '@/utils/jwt';
 
 type LoginError = {
   status?: number;
@@ -15,22 +16,6 @@ const isLoginError = (error: unknown): error is LoginError => {
   return typeof error === 'object' && error !== null && 'status' in error;
 };
 
-/** Decode a JWT without verifying signature — only for reading payload claims. */
-const decodeJwtPayload = (token: string): Record<string, unknown> | null => {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const json = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map((c) => '%' + c.charCodeAt(0).toString(16).padStart(2, '0'))
-        .join('')
-    );
-    return JSON.parse(json) as Record<string, unknown>;
-  } catch {
-    return null;
-  }
-};
 
 export const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -40,8 +25,6 @@ export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [login, { isLoading: isLoggingIn }] = useLoginMutation();
-
-  const isLoading = isLoggingIn;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +38,7 @@ export const LoginPage: React.FC = () => {
       const userId = typeof payload?.userId === 'number' ? payload.userId : null;
 
       // Step 3: Store credentials. permission loading is owned by RequireAuth
-      // which gets the destination rout euntil permissions resolve.
+      // which holds the destination route euntil permissions resolve.
       dispatch(
         setCredentials({
           user: userData.user ?? username,
@@ -64,7 +47,7 @@ export const LoginPage: React.FC = () => {
         })
       );
 
-      // Step 4: Navigate; RequireAuth shows its koader while permissions load.
+      // Step 4: Navigate; RequireAuth shows its loader while permissions load.
       navigate('/dashboard', { replace: true });
     } catch (err: unknown) {
       if (!isLoginError(err) || !err.status) {
@@ -192,7 +175,7 @@ export const LoginPage: React.FC = () => {
 
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoggingIn}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-[0_10px_20px_rgba(37,99,235,0.2)] transition-all transform active:scale-[0.98] mt-4 h-auto"
             >
               {isLoggingIn
