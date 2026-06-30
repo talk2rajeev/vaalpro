@@ -18,9 +18,6 @@ import UnauthorizedAlert from '@/apps/shared/components/UnauthorizedAlert';
 import { CaaldocLayout } from '@/apps/caaldoc/pages/CaaldocLayout';
 import RequireAuth from '@/components/auth/RequireAuth';
 
-let sessionRestorePromise: Promise<void> | null = null;
-
-
 const PermissionRoute = ({
   permission,
   children,
