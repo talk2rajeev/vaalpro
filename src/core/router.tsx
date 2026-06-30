@@ -33,9 +33,6 @@ const PermissionRoute = ({
   const permissions = useSelector(
     (state: RootState) => state.auth.permissions
   );
-  debugger;
-
-  console.log('permissions ', permissions);
 
   if (!permissions.some(p => allowdPermissionList.includes(p.permission_code ?? ''))) {
     return (
