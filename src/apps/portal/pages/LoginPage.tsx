@@ -4,12 +4,13 @@ import { Lock, User, CheckCircle2 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '@/features/auth/authSlice';
 import { useLoginMutation } from '@/features/auth/authApi';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import { Button } from '@/components/core-components/button';
 import { decodeJwtPayload } from '@/utils/jwt';
 
 type LoginError = {
   status?: number;
+  data?: {message?: string};
 };
 
 const isLoginError = (error: unknown): error is LoginError => {
@@ -23,6 +24,11 @@ export const LoginPage: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  //where to send the user after login, 
+  // the route they weer bounced from OR the dashboard by default
+  const from = (location.state as { from?: { pathname: string } } | null)?.from?.pathname ?? '/dashboard';
 
   const [login, { isLoading: isLoggingIn }] = useLoginMutation();
 
@@ -48,10 +54,12 @@ export const LoginPage: React.FC = () => {
       );
 
       // Step 4: Navigate; RequireAuth shows its loader while permissions load.
-      navigate('/dashboard', { replace: true });
+      navigate(from, { replace: true });
     } catch (err: unknown) {
       if (!isLoginError(err) || !err.status) {
         setErrorMsg('No Server Response');
+      } else if(err.data?.message) {
+        setErrorMsg(err.data.message);
       } else if (err.status === 400) {
         setErrorMsg('Missing Username or Password');
       } else if (err.status === 401) {
@@ -134,10 +142,13 @@ export const LoginPage: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="w-full space-y-6">
             <div className="space-y-2">
-              <label className="block text-sm font-bold text-slate-700 ml-1">Username</label>
+              <label htmlFor='username' className="block text-sm font-bold text-slate-700 ml-1">Username</label>
               <div className="relative group">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors w-5 h-5" />
                 <input
+                  id='username'
+                  name='username'
+                  autoComplete='username'
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
@@ -149,10 +160,13 @@ export const LoginPage: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-bold text-slate-700 ml-1">Password</label>
+              <label htmlFor='password' className="block text-sm font-bold text-slate-700 ml-1">Password</label>
               <div className="relative group">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors w-5 h-5" />
                 <input
+                  id='password'
+                  name='password'
+                  autoComplete='current-password'
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

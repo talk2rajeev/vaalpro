@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Outlet, Navigate } from 'react-router';
+import { Outlet, Navigate, useLocation } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '@/store/store';
 import { useRefreshMutation, useGetUserPermissionsQuery } from '@/features/auth/authApi';
@@ -26,6 +26,7 @@ import { decodeJwtPayload } from '@/utils/jwt';
  */
 const RequireAuth = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
   const { accessToken, userId, isAuthChecked, isPermissionsLoaded } = useSelector(
     (state: RootState) => state.auth
   );
@@ -112,9 +113,9 @@ const RequireAuth = () => {
     </div>;
   }
 
-  // Session couldn't be restored
+  // Session couldn't be restored. Remember where the uwer was headed so we can return them there after successful login.
   if (!accessToken && isAuthChecked) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return <Outlet />;
