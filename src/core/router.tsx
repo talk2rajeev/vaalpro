@@ -23,16 +23,15 @@ const PermissionRoute = ({
   permission,
   children,
 }: {
-  permission: string;
+  permission: string[];
   children: ReactNode;
 }) => {
 
-  const allowdPermissionList = permission.split(',');
   const permissions = useSelector(
     (state: RootState) => state.auth.permissions
   );
 
-  if (!permissions.some(p => allowdPermissionList.includes(p.permission_code ?? ''))) {
+  if (!permissions.some(p => permission.includes(p.permission_code ?? ''))) {
     return (
       <div className="flex flex-col min-h-screen w-full">
         {/* <DashboardHeader showLogo /> */}
@@ -51,8 +50,9 @@ const routes = [
     element: <LoginPage />,
   },
   {
+    // send root into protexted area; RequireAuth restores the session from the refresh token and redirect to /login if it fails
     path: '/',
-    element: <Navigate to="/login" replace />,
+    element: <Navigate to="/dashboard" replace />,
   },
   {
     element: <RequireAuth />,
@@ -60,7 +60,7 @@ const routes = [
       {
         path: '/dashboard',
         element: (
-          <PermissionRoute permission='vaalpro.dashboard.view,plant.config.configure'>
+          <PermissionRoute permission={['vaalpro.dashboard.view','plant.config.configure']}>
             <VaalproDashboardPage />
           </PermissionRoute>
         ),
@@ -71,7 +71,7 @@ const routes = [
           {
             path: '/caaldoc/dashboard',
             element: (
-              <PermissionRoute permission='caaldoc.dashboard.view'>
+              <PermissionRoute permission={['caaldoc.dashboard.view']}>
                 <CaaldocDashboardPage />
               </PermissionRoute>
             ),
@@ -79,7 +79,7 @@ const routes = [
           {
             path: '/caaldoc/plants/:id',
             element: (
-              <PermissionRoute permission='caaldoc.plant.view'>
+              <PermissionRoute permission={['caaldoc.plant.view']}>
                 <PlantDetailsPage />
               </PermissionRoute>
             ),
@@ -87,7 +87,7 @@ const routes = [
           {
             path: '/caaldoc/audit',
             element: (
-              <PermissionRoute permission='caaldoc.log.view'>
+              <PermissionRoute permission={['caaldoc.log.view']}>
                 <AuditLogPage />
               </PermissionRoute>
             ),
@@ -95,7 +95,7 @@ const routes = [
           {
             path: '/caaldoc/settings',
             element: (
-              <PermissionRoute permission='caaldoc.setting.view'>
+              <PermissionRoute permission={['caaldoc.setting.view']}>
                 <SettingsPage />
               </PermissionRoute>
             ),
