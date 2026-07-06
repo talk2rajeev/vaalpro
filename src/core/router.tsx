@@ -57,7 +57,7 @@ const routes = [
                     element: <CaaldocDashboardPage />,
                     handle: {
                       requiredModule: MODULES.CAALDOC,
-                      entryPermission: PERMISSIONS.CAALDOC.DASHBOARD_VIEW,
+                      routeAccessPermissions: PERMISSIONS.CAALDOC.DASHBOARD_VIEW,
                     },
                   },
                   {
@@ -65,7 +65,7 @@ const routes = [
                     element: <PlantDetailsPage />,
                     handle: {
                       requiredModule: MODULES.CAALDOC,
-                      entryPermission: PERMISSIONS.CAALDOC.PLANT_VIEW,
+                      routeAccessPermissions: PERMISSIONS.CAALDOC.PLANT_VIEW,
                     },
                   },
                   {
@@ -73,7 +73,7 @@ const routes = [
                     element: <AuditLogPage />,
                     handle: {
                       requiredModule: MODULES.CAALDOC,
-                      entryPermission: PERMISSIONS.CAALDOC.LOG_VIEW,
+                      routeAccessPermissions: PERMISSIONS.CAALDOC.LOG_VIEW,
                     },
                   },
                   {
@@ -81,7 +81,7 @@ const routes = [
                     element: <SettingsPage />,
                     handle: {
                       requiredModule: MODULES.CAALDOC,
-                      entryPermission: PERMISSIONS.CAALDOC.SETTING_VIEW,
+                      routeAccessPermissions: PERMISSIONS.CAALDOC.SETTING_VIEW,
                     },
                   },
                 ],

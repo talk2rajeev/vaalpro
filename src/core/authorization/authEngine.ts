@@ -37,9 +37,9 @@ export const createAuthEngine = (context: AuthStateContext) => {
     },
 
     /** Perimeter validation for workspace environments (Workspace Entry Check) */
-    canAccessWorkspace(entryPermission?: PermissionCode): boolean {
-      if (!entryPermission) return true;
-      return permissions.some(p => p.permission_code === entryPermission);
+    canAccessWorkspace(routeAccessPermissions?: PermissionCode): boolean {
+      if (!routeAccessPermissions) return true;
+      return permissions.some(p => p.permission_code === routeAccessPermissions);
     },
 
     /** Atomic feature capability evaluation */

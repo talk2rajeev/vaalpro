@@ -18,7 +18,7 @@ export const RouteGuard = () => {
   const currentMatch = matches[matches.length - 1];
   const handle = currentMatch?.handle as RouteHandle | undefined;
 
-  if (handle?.entryPermission && !engine.canAccessWorkspace(handle.entryPermission)) {
+  if (handle?.routeAccessPermissions && !engine.canAccessWorkspace(handle.routeAccessPermissions)) {
     return (
       <div className="w-full h-full p-6 flex items-center justify-center">
         <UnauthorizedAlert
