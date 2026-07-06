@@ -1,14 +1,18 @@
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router';
 import type { RouteObject } from 'react-router';
-import LoginPage from '@/apps/portal/pages/LoginPage';
-import VaalproDashboardPage from '@/apps/portal/pages/VaalproDashboardPage';
+import LoginPage from '@/apps/portal/pages/loginPage/LoginPage';
+import VaalproDashboardPage from '@/apps/portal/pages/vaalproDashboardPage/VaalproDashboardPage';
 import CaaldocDashboardPage from '@/apps/caaldoc/pages/CaaldocDashboardPage';
 import PlantDetailsPage from '@/apps/caaldoc/pages/PlantDetailsPage';
 import AuditLogPage from '@/apps/caaldoc/pages/AuditLogPage';
 import SettingsPage from '@/apps/caaldoc/pages/SettingsPage';
 import VaaldocComingSoonPage from '@/apps/vaaldoc/pages/VaaldocComingSoonPage';
-import DashboardPage from '@/apps/vaalpro-admin/pages/DashboardPage';
 import { CaaldocLayout } from '@/apps/caaldoc/pages/CaaldocLayout';
+import { VaalProLayout } from '@/apps/portal/components/VaalProLayout';
+import IamUsersManagementPage from '@/apps/portal/pages/iamUsersManagementPage/IamUsersManagementPage';
+import VendorManagementPage from '@/apps/portal/pages/vendorManagementPage/VendorManagementPage';
+import IamRoleManagementPage from '@/apps/portal/pages/iamRoleManagementPage/IamRoleManagementPage';
+import IamPermissionManagementPage from '@/apps/portal/pages/iamPermissionManagementPage/IamPermissionManagementPage';
 import RequireAuth from '@/components/auth/requireAuth/RequireAuth';
 import ModuleGuard from '@/components/auth/moduleGuard/ModuleGuard';
 import RouteGuard from '@/components/auth/routeGuard/RouteGuard';
@@ -29,10 +33,27 @@ const routes = [
     children: [
       {
         path: '/system-admin',
+        element: <VaalProLayout />,
         children: [
           {
             index: true,
-            element: <DashboardPage />,
+            element: <Navigate to="/system-admin/iam-users" replace />,
+          },
+          {
+            path: 'iam-users',
+            element: <IamUsersManagementPage />,
+          },
+          {
+            path: 'vendor-management',
+            element: <VendorManagementPage />,
+          },
+          {
+            path: 'iam-roles',
+            element: <IamRoleManagementPage />,
+          },
+          {
+            path: 'iam-permissions',
+            element: <IamPermissionManagementPage />,
           },
         ],
       },
