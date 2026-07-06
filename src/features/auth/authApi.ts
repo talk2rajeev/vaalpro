@@ -11,6 +11,15 @@ type LoginResponse = {
   accessToken: string;
 };
 
+export type ModuleResponse = {
+  userId: string;
+  tenantId: string;
+  userType: 'PLATFORM_ADMIN' | 'ADMIN' | 'USER';
+  subscribed_apps: string[];
+  exp: number;
+  iat: number;
+};
+
 export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginCredentials>({
@@ -29,7 +38,10 @@ export const authApi = apiSlice.injectEndpoints({
     getUserPermissions: builder.query<UserPermission[], number>({
       query: (userId) => `/userpermissions/${userId}`,
     }),
+    getModule: builder.query<ModuleResponse, void>({
+      query: () => '/module',
+    }),
   }),
 });
 
-export const { useLoginMutation, useRefreshMutation, useGetUserPermissionsQuery } = authApi;
+export const { useLoginMutation, useRefreshMutation, useGetUserPermissionsQuery, useGetModuleQuery } = authApi;

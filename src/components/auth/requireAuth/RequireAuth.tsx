@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react';
-import { Outlet, Navigate, useLocation } from 'react-router';
+import { Outlet, Navigate, useLocation, useNavigate } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '@/store/store';
-import { useRefreshMutation, useGetUserPermissionsQuery } from '@/features/auth/authApi';
-import { setCredentials, setPermissions, logout } from '@/features/auth/authSlice';
+import { useRefreshMutation, useGetUserPermissionsQuery, useGetModuleQuery } from '@/features/auth/authApi';
+import { setCredentials, setPermissions, setModuleData, logout } from '@/features/auth/authSlice';
 import { Loader2 } from 'lucide-react';
 import { decodeJwtPayload } from '@/utils/jwt';
 
@@ -27,7 +27,8 @@ import { decodeJwtPayload } from '@/utils/jwt';
 const RequireAuth = () => {
   const dispatch = useDispatch();
   const location = useLocation();
-  const { accessToken, userId, isAuthChecked, isPermissionsLoaded } = useSelector(
+  const navigate = useNavigate();
+  const { accessToken, userId, isAuthChecked, isPermissionsLoaded, isModuleLoaded, moduleData } = useSelector(
     (state: RootState) => state.auth
   );
 
@@ -71,22 +72,45 @@ const RequireAuth = () => {
   }, [accessToken, isAuthChecked, dispatch, refresh]);
 
   // ------------------------------------------------------------------
-  // Step 4: Fetch permissions once userId is available
+  // Step 4: Fetch module data once accessToken is available
   // ------------------------------------------------------------------
-  const { 
-    data: permissionsData, 
-    isSuccess: permissionsSuccess, 
+  const {
+    data: moduleDataResponse,
+    isSuccess: moduleSuccess,
+    isError: moduleError,
+  } = useGetModuleQuery(undefined, { skip: !accessToken || isModuleLoaded });
+
+  // Step 5: Commit module data to the store
+  useEffect(() => {
+    if (moduleSuccess && moduleDataResponse) {
+      dispatch(setModuleData(moduleDataResponse));
+    }
+  }, [moduleSuccess, moduleDataResponse, dispatch]);
+
+  // If module data fails to load, end the session
+  useEffect(() => {
+    if (moduleError) {
+      dispatch(logout());
+    }
+  }, [moduleError, dispatch]);
+
+  // ------------------------------------------------------------------
+  // Step 6: Fetch permissions once userId is available
+  // ------------------------------------------------------------------
+  const {
+    data: permissionsData,
+    isSuccess: permissionsSuccess,
     isError: permissionsError,
   } = useGetUserPermissionsQuery(userId!, { skip: !userId });
 
-  // Step 5: Commit permissions to the store
+  // Step 7: Commit permissions to the store
   useEffect(() => {
     if (permissionsSuccess && permissionsData) {
       dispatch(setPermissions(permissionsData));
     }
   }, [permissionsSuccess, permissionsData, dispatch]);
 
-  // If permissions fails to load we cant make access decisions; end the 
+  // If permissions fails to load we cant make access decisions; end the
   // session rahter than leaving hte user stuck on the loader forever.
   useEffect(() => {
     if (permissionsError) {
@@ -95,14 +119,31 @@ const RequireAuth = () => {
   }, [permissionsError, dispatch]);
 
   // ------------------------------------------------------------------
+  // Step 8: Redirect PLATFORM_ADMIN users to /system-admin
+  // ------------------------------------------------------------------
+  useEffect(() => {
+    if (!moduleData) return;
+    
+    const isAccessingAdminZone = location.pathname.startsWith('/system-admin');
+
+    if (moduleData.userType === 'PLATFORM_ADMIN') {
+      // Platform admins are restricted to the /system-admin ecosystem
+      if (!isAccessingAdminZone) {
+        navigate('/system-admin', { replace: true });
+      }
+    }
+  }, [moduleData, location.pathname, navigate]);
+
+  // ------------------------------------------------------------------
   // UI States
   // ------------------------------------------------------------------
 
-  // Still waiting for the refresh call or permissions to load
+  // Still waiting for the refresh call, module data, or permissions to load
   const isInitialising = !accessToken && !isAuthChecked;
+  const isLoadingModule = !!accessToken && !isModuleLoaded;
   const isLoadingPermissions = !!userId && !isPermissionsLoaded;
 
-  if (isRefreshing || isInitialising || isLoadingPermissions) {
+  if (isRefreshing || isInitialising || isLoadingModule || isLoadingPermissions) {
     return <div className="flex items-center justify-center h-screen w-screen">
       <div className='bg-slate-50 rounded-xl shadow-md border border-slate-200 p-8 flex flex-col gap-4 items-center justify-center'>
         <div className="flex items-center gap-2">
