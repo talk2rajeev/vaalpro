@@ -1,12 +1,5 @@
-import  type { ReactNode } from 'react';
-import {
-  createBrowserRouter,
-  Navigate,
-  RouterProvider,
-} from 'react-router';
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router';
 import type { RouteObject } from 'react-router';
-import { useSelector } from 'react-redux';
-import type { RootState } from '@/store/store';
 import LoginPage from '@/apps/portal/pages/LoginPage';
 import VaalproDashboardPage from '@/apps/portal/pages/VaalproDashboardPage';
 import CaaldocDashboardPage from '@/apps/caaldoc/pages/CaaldocDashboardPage';
@@ -14,35 +7,13 @@ import PlantDetailsPage from '@/apps/caaldoc/pages/PlantDetailsPage';
 import AuditLogPage from '@/apps/caaldoc/pages/AuditLogPage';
 import SettingsPage from '@/apps/caaldoc/pages/SettingsPage';
 import VaaldocComingSoonPage from '@/apps/vaaldoc/pages/VaaldocComingSoonPage';
-import UnauthorizedAlert from '@/apps/shared/components/UnauthorizedAlert';
-// import DashboardHeader from '@/apps/shared/components/DashboardHeader';
+import DashboardPage from '@/apps/vaalpro-admin/pages/DashboardPage';
 import { CaaldocLayout } from '@/apps/caaldoc/pages/CaaldocLayout';
-import RequireAuth from '@/components/auth/RequireAuth';
-
-const PermissionRoute = ({
-  permission,
-  children,
-}: {
-  permission: string[];
-  children: ReactNode;
-}) => {
-
-  const permissions = useSelector(
-    (state: RootState) => state.auth.permissions
-  );
-
-  if (!permissions.some(p => permission.includes(p.permission_code ?? ''))) {
-    return (
-      <div className="flex flex-col min-h-screen w-full">
-        {/* <DashboardHeader showLogo /> */}
-        <UnauthorizedAlert title="Unauthorized" description="You do not have permission to view this resource." />
-      </div>
-    )
-  }
-
-  return <>{children}</>;
-};
-
+import RequireAuth from '@/components/auth/requireAuth/RequireAuth';
+import ModuleGuard from '@/components/auth/moduleGuard/ModuleGuard';
+import RouteGuard from '@/components/auth/routeGuard/RouteGuard';
+import { PERMISSIONS } from '@/core/authorization/permissions';
+import { MODULES } from '@/core/authorization/modules';
 
 const routes = [
   {
@@ -50,7 +21,6 @@ const routes = [
     element: <LoginPage />,
   },
   {
-    // send root into protexted area; RequireAuth restores the session from the refresh token and redirect to /login if it fails
     path: '/',
     element: <Navigate to="/dashboard" replace />,
   },
@@ -58,53 +28,72 @@ const routes = [
     element: <RequireAuth />,
     children: [
       {
-        path: '/dashboard',
-        element: (
-          <PermissionRoute permission={['vaalpro.dashboard.view','plant.config.configure']}>
-            <VaalproDashboardPage />
-          </PermissionRoute>
-        ),
-      },
-      {
-        element: <CaaldocLayout />,
+        path: '/system-admin',
         children: [
           {
-            path: '/caaldoc/dashboard',
-            element: (
-              <PermissionRoute permission={['caaldoc.dashboard.view']}>
-                <CaaldocDashboardPage />
-              </PermissionRoute>
-            ),
-          },
-          {
-            path: '/caaldoc/plants/:id',
-            element: (
-              <PermissionRoute permission={['caaldoc.plant.view']}>
-                <PlantDetailsPage />
-              </PermissionRoute>
-            ),
-          },
-          {
-            path: '/caaldoc/audit',
-            element: (
-              <PermissionRoute permission={['caaldoc.log.view']}>
-                <AuditLogPage />
-              </PermissionRoute>
-            ),
-          },
-          {
-            path: '/caaldoc/settings',
-            element: (
-              <PermissionRoute permission={['caaldoc.setting.view']}>
-                <SettingsPage />
-              </PermissionRoute>
-            ),
+            index: true,
+            element: <DashboardPage />,
           },
         ],
       },
       {
-        path: '/vaaldoc',
-        element: <VaaldocComingSoonPage />,
+        element: <ModuleGuard />,
+        children: [
+          {
+            path: '/dashboard',
+            element: <VaalproDashboardPage />,
+            handle: {
+              requiredModule: MODULES.PORTAL,
+            },
+          },
+          {
+            element: <CaaldocLayout />,
+            children: [
+              {
+                element: <RouteGuard />,
+                children: [
+                  {
+                    path: '/caaldoc/dashboard',
+                    element: <CaaldocDashboardPage />,
+                    handle: {
+                      requiredModule: MODULES.CAALDOC,
+                      entryPermission: PERMISSIONS.CAALDOC.DASHBOARD_VIEW,
+                    },
+                  },
+                  {
+                    path: '/caaldoc/plants/:id',
+                    element: <PlantDetailsPage />,
+                    handle: {
+                      requiredModule: MODULES.CAALDOC,
+                      entryPermission: PERMISSIONS.CAALDOC.PLANT_VIEW,
+                    },
+                  },
+                  {
+                    path: '/caaldoc/audit',
+                    element: <AuditLogPage />,
+                    handle: {
+                      requiredModule: MODULES.CAALDOC,
+                      entryPermission: PERMISSIONS.CAALDOC.LOG_VIEW,
+                    },
+                  },
+                  {
+                    path: '/caaldoc/settings',
+                    element: <SettingsPage />,
+                    handle: {
+                      requiredModule: MODULES.CAALDOC,
+                      entryPermission: PERMISSIONS.CAALDOC.SETTING_VIEW,
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            path: '/vaaldoc',
+            element: <VaaldocComingSoonPage />,
+            handle: { requiredModule: MODULES.VAALDOC },
+          },
+        ],
       },
       {
         path: '*',
@@ -115,5 +104,4 @@ const routes = [
 ] satisfies RouteObject[];
 
 const router = createBrowserRouter(routes);
-
 export const AppRouter = () => <RouterProvider router={router} />;
