@@ -12,8 +12,8 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   {
-    label: 'IAM Users Management',
-    path: '/system-admin/iam-users',
+    label: 'Users Management',
+    path: '/system-admin/users',
     icon: <Users size={20} />,
   },
   {
@@ -22,13 +22,13 @@ const menuItems: MenuItem[] = [
     icon: <Store size={20} />,
   },
   {
-    label: 'IAM Role Management',
-    path: '/system-admin/iam-roles',
+    label: 'Role Management',
+    path: '/system-admin/roles',
     icon: <ShieldCheck size={20} />,
   },
   {
-    label: 'IAM Permission Management',
-    path: '/system-admin/iam-permissions',
+    label: 'Permission Management',
+    path: '/system-admin/permissions',
     icon: <KeyRound size={20} />,
   },
 ];
@@ -39,7 +39,7 @@ const SideMenu: React.FC = () => {
   const dispatch = useDispatch();
 
   return (
-    <aside className="w-64 bg-white border-r border-slate-200 flex flex-col">
+    <aside className="w-72 bg-white border-r border-slate-200 flex flex-col">
       <nav className="flex-1 p-4 space-y-2">
         {menuItems.map((item) => {
           const isActive = location.pathname === item.path;

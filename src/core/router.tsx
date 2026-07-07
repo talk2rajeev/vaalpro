@@ -37,10 +37,10 @@ const routes = [
         children: [
           {
             index: true,
-            element: <Navigate to="/system-admin/iam-users" replace />,
+            element: <Navigate to="/system-admin/users" replace />,
           },
           {
-            path: 'iam-users',
+            path: 'users',
             element: <IamUsersManagementPage />,
           },
           {
@@ -48,11 +48,11 @@ const routes = [
             element: <VendorManagementPage />,
           },
           {
-            path: 'iam-roles',
+            path: 'roles',
             element: <IamRoleManagementPage />,
           },
           {
-            path: 'iam-permissions',
+            path: 'permissions',
             element: <IamPermissionManagementPage />,
           },
         ],
