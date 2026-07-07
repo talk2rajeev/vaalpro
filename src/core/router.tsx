@@ -9,10 +9,10 @@ import SettingsPage from '@/apps/caaldoc/pages/SettingsPage';
 import VaaldocComingSoonPage from '@/apps/vaaldoc/pages/VaaldocComingSoonPage';
 import { CaaldocLayout } from '@/apps/caaldoc/pages/CaaldocLayout';
 import { VaalProLayout } from '@/apps/portal/components/VaalProLayout';
-import IamUsersManagementPage from '@/apps/portal/pages/iamUsersManagementPage/IamUsersManagementPage';
+import UsersManagementPage from '@/apps/portal/pages/usersManagementPage/UsersManagementPage';
 import VendorManagementPage from '@/apps/portal/pages/vendorManagementPage/VendorManagementPage';
-import IamRoleManagementPage from '@/apps/portal/pages/iamRoleManagementPage/IamRoleManagementPage';
-import IamPermissionManagementPage from '@/apps/portal/pages/iamPermissionManagementPage/IamPermissionManagementPage';
+import RoleManagementPage from '@/apps/portal/pages/roleManagementPage/RoleManagementPage';
+import PermissionManagementPage from '@/apps/portal/pages/permissionManagementPage/PermissionManagementPage';
 import RequireAuth from '@/components/auth/requireAuth/RequireAuth';
 import ModuleGuard from '@/components/auth/moduleGuard/ModuleGuard';
 import RouteGuard from '@/components/auth/routeGuard/RouteGuard';
@@ -41,7 +41,7 @@ const routes = [
           },
           {
             path: 'users',
-            element: <IamUsersManagementPage />,
+            element: <UsersManagementPage />,
           },
           {
             path: 'vendor-management',
@@ -49,11 +49,11 @@ const routes = [
           },
           {
             path: 'roles',
-            element: <IamRoleManagementPage />,
+            element: <RoleManagementPage />,
           },
           {
             path: 'permissions',
-            element: <IamPermissionManagementPage />,
+            element: <PermissionManagementPage />,
           },
         ],
       },
