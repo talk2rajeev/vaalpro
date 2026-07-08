@@ -13,6 +13,7 @@ import UsersManagementPage from '@/apps/portal/pages/usersManagementPage/UsersMa
 import VendorManagementPage from '@/apps/portal/pages/vendorManagementPage/VendorManagementPage';
 import RoleManagementPage from '@/apps/portal/pages/roleManagementPage/RoleManagementPage';
 import PermissionManagementPage from '@/apps/portal/pages/permissionManagementPage/PermissionManagementPage';
+import PermissionGroupPage from '@/apps/portal/pages/permissionGroupPage/PermissionGroupPage';
 import SubscriptionManagementPage from '@/apps/portal/pages/subscriptionManagementPage/SubscriptionManagementPage';
 import RequireAuth from '@/components/auth/requireAuth/RequireAuth';
 import ModuleGuard from '@/components/auth/moduleGuard/ModuleGuard';
@@ -45,7 +46,7 @@ const routes = [
             element: <UsersManagementPage />,
           },
           {
-            path: 'vendor-management',
+            path: 'vendors',
             element: <VendorManagementPage />,
           },
           {
@@ -55,6 +56,10 @@ const routes = [
           {
             path: 'permissions',
             element: <PermissionManagementPage />,
+          },
+          {
+            path: 'permission-groups',
+            element: <PermissionGroupPage />,
           },
           {
             path: 'subscriptions',
