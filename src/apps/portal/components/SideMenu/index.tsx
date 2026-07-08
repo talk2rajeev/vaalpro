@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router';
-import { Users, Store, ShieldCheck, KeyRound, LogOut } from 'lucide-react';
+import { Users, Store, ShieldCheck, KeyRound, LogOut, CreditCard } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { logout } from '@/features/auth/authSlice';
 
@@ -30,6 +30,11 @@ const menuItems: MenuItem[] = [
     label: 'Permission Management',
     path: '/system-admin/permissions',
     icon: <KeyRound size={20} />,
+  },
+  {
+    label: 'Manage Subscription',
+    path: '/system-admin/subscriptions',
+    icon: <CreditCard size={20} />,
   },
 ];
 
