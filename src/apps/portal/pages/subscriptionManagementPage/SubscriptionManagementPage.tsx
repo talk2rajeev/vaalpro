@@ -31,132 +31,122 @@ import {
 } from '@/components/core-components/dialog';
 
 // ── Types ──────────────────────────────────────────────────────────────
-interface Vendor {
-  id: string;
-  name: string;
-  displayName: string;
-  vendorType: 'PHARMA_COMPANY' | 'VENDOR';
-  status: 'ACTIVE' | 'SUSPENDED' | 'DEACTIVATED';
+interface Subscription {
+  subscriptionId: string;
+  vendorId: string;
+  status: 'ACTIVE' | 'EXPIRED' | 'PENDING';
+  licensedAt: string;
   createdAt: string;
   updatedAt: string;
 }
 
 // ── Dummy data ─────────────────────────────────────────────────────────
-const DUMMY_VENDORS: Vendor[] = [
+const DUMMY_SUBSCRIPTIONS: Subscription[] = [
   {
-    id: 'VND-001',
-    name: 'PFIZER_INC',
-    displayName: 'Pfizer India Ltd.',
-    vendorType: 'PHARMA_COMPANY',
+    subscriptionId: 'SUB-001',
+    vendorId: 'VND-201',
     status: 'ACTIVE',
+    licensedAt: '2026-01-10T08:00:00Z',
     createdAt: '2026-01-10T08:00:00Z',
     updatedAt: '2026-06-15T10:30:00Z',
   },
   {
-    id: 'VND-002',
-    name: 'LABCORP_TESTING',
-    displayName: 'LabCorp Testing Services',
-    vendorType: 'VENDOR',
+    subscriptionId: 'SUB-002',
+    vendorId: 'VND-342',
     status: 'ACTIVE',
+    licensedAt: '2026-02-15T09:00:00Z',
     createdAt: '2026-02-15T09:00:00Z',
     updatedAt: '2026-02-15T09:00:00Z',
   },
   {
-    id: 'VND-003',
-    name: 'MODERNA_BIOTECH',
-    displayName: 'Moderna Therapeutics',
-    vendorType: 'PHARMA_COMPANY',
-    status: 'SUSPENDED',
+    subscriptionId: 'SUB-003',
+    vendorId: 'VND-115',
+    status: 'EXPIRED',
+    licensedAt: '2025-06-01T12:00:00Z',
     createdAt: '2025-06-01T12:00:00Z',
     updatedAt: '2026-06-01T12:00:00Z',
   },
   {
-    id: 'VND-004',
-    name: 'BIOTECH_EQUIPMENTS',
-    displayName: 'BioTech Labs & Instruments',
-    vendorType: 'VENDOR',
-    status: 'DEACTIVATED',
+    subscriptionId: 'SUB-004',
+    vendorId: 'VND-889',
+    status: 'PENDING',
+    licensedAt: '2026-07-01T14:00:00Z',
     createdAt: '2026-07-01T14:00:00Z',
     updatedAt: '2026-07-01T14:00:00Z',
   },
 ];
 
 // ── Component ──────────────────────────────────────────────────────────
-const VendorManagementPage = () => {
-  const [data, setData] = useState<Vendor[]>(DUMMY_VENDORS);
-  const [editingVendor, setEditingVendor] = useState<Vendor | null>(null);
-  const [deletingVendor, setDeletingVendor] = useState<Vendor | null>(null);
+const SubscriptionManagementPage = () => {
+  const [data, setData] = useState<Subscription[]>(DUMMY_SUBSCRIPTIONS);
+  const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
+  const [deletingSubscription, setDeletingSubscription] = useState<Subscription | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
   // Form states
-  const [formName, setFormName] = useState('');
-  const [formDisplayName, setFormDisplayName] = useState('');
-  const [formVendorType, setFormVendorType] = useState<'PHARMA_COMPANY' | 'VENDOR'>('VENDOR');
-  const [formStatus, setFormStatus] = useState<'ACTIVE' | 'SUSPENDED' | 'DEACTIVATED'>('ACTIVE');
+  const [formVendorId, setFormVendorId] = useState('');
+  const [formStatus, setFormStatus] = useState<'ACTIVE' | 'EXPIRED' | 'PENDING'>('ACTIVE');
+  const [formLicensedAt, setFormLicensedAt] = useState('');
 
-  const handleEditClick = useCallback((vendor: Vendor) => {
-    setEditingVendor(vendor);
-    setFormName(vendor.name);
-    setFormDisplayName(vendor.displayName);
-    setFormVendorType(vendor.vendorType);
-    setFormStatus(vendor.status);
+  const handleEditClick = useCallback((sub: Subscription) => {
+    setEditingSubscription(sub);
+    setFormVendorId(sub.vendorId);
+    setFormStatus(sub.status);
+    setFormLicensedAt(sub.licensedAt.split('T')[0]);
   }, []);
 
-  const handleDeleteClick = useCallback((vendor: Vendor) => {
-    setDeletingVendor(vendor);
+  const handleDeleteClick = useCallback((sub: Subscription) => {
+    setDeletingSubscription(sub);
   }, []);
 
   const handleAddClick = () => {
     setIsAdding(true);
-    setFormName('');
-    setFormDisplayName('');
-    setFormVendorType('VENDOR');
+    setFormVendorId('');
     setFormStatus('ACTIVE');
+    setFormLicensedAt(new Date().toISOString().split('T')[0]);
   };
 
   const handleSaveEdit = () => {
-    if (!editingVendor) return;
+    if (!editingSubscription) return;
 
     setData((prev) =>
       prev.map((item) =>
-        item.id === editingVendor.id
+        item.subscriptionId === editingSubscription.subscriptionId
           ? {
               ...item,
-              name: formName,
-              displayName: formDisplayName,
-              vendorType: formVendorType,
+              vendorId: formVendorId,
               status: formStatus,
+              licensedAt: new Date(formLicensedAt).toISOString(),
               updatedAt: new Date().toISOString(),
             }
           : item
       )
     );
-    setEditingVendor(null);
+    setEditingSubscription(null);
   };
 
   const handleSaveAdd = () => {
     const nextNum = data.length > 0 
-      ? Math.max(...data.map(d => parseInt(d.id.split('-')[1], 10))) + 1 
+      ? Math.max(...data.map(d => parseInt(d.subscriptionId.split('-')[1], 10))) + 1 
       : 1;
     const paddedNum = String(nextNum).padStart(3, '0');
-    const newVendor: Vendor = {
-      id: `VND-${paddedNum}`,
-      name: formName.toUpperCase().replace(/\s+/g, '_') || `VENDOR_${paddedNum}`,
-      displayName: formDisplayName || `Vendor ${paddedNum}`,
-      vendorType: formVendorType,
+    const newSub: Subscription = {
+      subscriptionId: `SUB-${paddedNum}`,
+      vendorId: formVendorId || `VND-${Math.floor(100 + Math.random() * 900)}`,
       status: formStatus,
+      licensedAt: new Date(formLicensedAt).toISOString(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
-    setData((prev) => [...prev, newVendor]);
+    setData((prev) => [...prev, newSub]);
     setIsAdding(false);
   };
 
   const handleConfirmDelete = () => {
-    if (!deletingVendor) return;
-    setData((prev) => prev.filter((item) => item.id !== deletingVendor.id));
-    setDeletingVendor(null);
+    if (!deletingSubscription) return;
+    setData((prev) => prev.filter((item) => item.subscriptionId !== deletingSubscription.subscriptionId));
+    setDeletingSubscription(null);
   };
 
   const formatDate = (isoString: string) => {
@@ -169,43 +159,21 @@ const VendorManagementPage = () => {
 
   // ── Column definitions ─────────────────────────────────────────────────
   const columns = useMemo(() => {
-    const columnHelper = createColumnHelper<Vendor>();
+    const columnHelper = createColumnHelper<Subscription>();
     return [
-      columnHelper.accessor('id', {
-        header: 'Vendor ID',
+      columnHelper.accessor('subscriptionId', {
+        header: 'Subscription ID',
         cell: (info) => (
           <span className="font-mono text-xs text-muted-foreground">
             {info.getValue()}
           </span>
         ),
       }),
-      columnHelper.accessor('name', {
-        header: 'Name',
+      columnHelper.accessor('vendorId', {
+        header: 'Vendor ID',
         cell: (info) => (
-          <span className="font-mono text-xs font-semibold text-slate-800">{info.getValue()}</span>
+          <span className="font-semibold text-slate-800">{info.getValue()}</span>
         ),
-      }),
-      columnHelper.accessor('displayName', {
-        header: 'Display Name',
-        cell: (info) => (
-          <span className="font-semibold text-slate-750">{info.getValue()}</span>
-        ),
-      }),
-      columnHelper.accessor('vendorType', {
-        header: 'Vendor Type',
-        cell: (info) => {
-          const type = info.getValue();
-          const isPharma = type === 'PHARMA_COMPANY';
-          return (
-            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold border ${
-              isPharma 
-                ? 'bg-blue-50 text-blue-700 border-blue-200' 
-                : 'bg-indigo-50 text-indigo-700 border-indigo-200'
-            }`}>
-              {type === 'PHARMA_COMPANY' ? 'PHARMA COMPANY' : 'VENDOR'}
-            </span>
-          );
-        },
       }),
       columnHelper.accessor('status', {
         header: 'Status',
@@ -214,10 +182,10 @@ const VendorManagementPage = () => {
           let badgeClass = 'bg-slate-50 text-slate-700 border-slate-200';
           if (status === 'ACTIVE') {
             badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-          } else if (status === 'SUSPENDED') {
-            badgeClass = 'bg-amber-50 text-amber-700 border-amber-200';
-          } else if (status === 'DEACTIVATED') {
+          } else if (status === 'EXPIRED') {
             badgeClass = 'bg-rose-50 text-rose-700 border-rose-200';
+          } else if (status === 'PENDING') {
+            badgeClass = 'bg-amber-50 text-amber-700 border-amber-200';
           }
           return (
             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${badgeClass}`}>
@@ -226,45 +194,49 @@ const VendorManagementPage = () => {
           );
         },
       }),
+      columnHelper.accessor('licensedAt', {
+        header: 'Licensed At',
+        cell: (info) => formatDate(info.getValue()),
+      }),
       columnHelper.accessor('createdAt', {
-        header: 'Created At',
+        header: 'Created Date',
         cell: (info) => formatDate(info.getValue()),
       }),
       columnHelper.accessor('updatedAt', {
-        header: 'Updated At',
+        header: 'Updated Date',
         cell: (info) => formatDate(info.getValue()),
       }),
       columnHelper.display({
         id: 'actions',
         header: () => <div className="text-right pr-4">Actions</div>,
         cell: (info) => {
-          const vendor = info.row.original;
+          const sub = info.row.original;
           return (
             <div className="flex items-center justify-end gap-2 pr-2">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
-                    onClick={() => handleEditClick(vendor)}
+                    onClick={() => handleEditClick(sub)}
                     className="p-1.5 rounded-md text-slate-500 hover:text-blue-600 hover:bg-slate-100 active:scale-95 transition-all duration-150 cursor-pointer"
                   >
                     <Pencil className="size-4.5" />
-                    <span className="sr-only">Edit Vendor</span>
+                    <span className="sr-only">Edit Subscription</span>
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="right">Edit Vendor</TooltipContent>
+                <TooltipContent side="right">Edit Subscription</TooltipContent>
               </Tooltip>
 
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
-                    onClick={() => handleDeleteClick(vendor)}
+                    onClick={() => handleDeleteClick(sub)}
                     className="p-1.5 rounded-md text-slate-500 hover:text-red-600 hover:bg-slate-100 active:scale-95 transition-all duration-150 cursor-pointer"
                   >
                     <Trash2 className="size-4.5" />
-                    <span className="sr-only">Delete Vendor</span>
+                    <span className="sr-only">Delete Subscription</span>
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="right">Delete Vendor</TooltipContent>
+                <TooltipContent side="right">Delete Subscription</TooltipContent>
               </Tooltip>
             </div>
           );
@@ -289,15 +261,15 @@ const VendorManagementPage = () => {
               <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
                 System Administration
               </p>
-              <h1 className="mt-2 text-3xl font-bold">Vendor Management</h1>
+              <h1 className="mt-2 text-3xl font-bold">Subscription Management</h1>
               <p className="mt-3 text-slate-600">
-                Onboard, manage, and configure details of system vendors and pharmaceutical companies.
+                Manage, audit, and configure vendor licenses, active subscriptions, and renewal dates.
               </p>
             </div>
 
             <Button className="shrink-0" onClick={handleAddClick}>
               <Plus data-icon="inline-start" className="size-4" />
-              Add Vendor
+              Add Subscription
             </Button>
           </div>
 
@@ -341,7 +313,7 @@ const VendorManagementPage = () => {
                       colSpan={columns.length}
                       className="h-24 text-center text-muted-foreground"
                     >
-                      No vendors found.
+                      No subscriptions found.
                     </TableCell>
                   </TableRow>
                 )}
@@ -352,10 +324,10 @@ const VendorManagementPage = () => {
 
         {/* Add/Edit Form Dialog */}
         <Dialog 
-          open={editingVendor !== null || isAdding} 
+          open={editingSubscription !== null || isAdding} 
           onOpenChange={(open) => {
             if (!open) {
-              setEditingVendor(null);
+              setEditingSubscription(null);
               setIsAdding(false);
             }
           }}
@@ -363,52 +335,25 @@ const VendorManagementPage = () => {
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>
-                {isAdding ? 'Add Vendor' : 'Edit Vendor'}
+                {isAdding ? 'Add Subscription' : 'Edit Subscription'}
               </DialogTitle>
               <DialogDescription>
-                Provide details for the {isAdding ? 'new' : 'existing'} vendor account.
+                Fill in the details below to {isAdding ? 'create a new' : 'modify this'} subscription.
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 py-4">
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Vendor Name (System Key)
+                  Vendor ID
                 </label>
                 <input
                   type="text"
-                  value={formName}
-                  onChange={(e) => setFormName(e.target.value)}
+                  value={formVendorId}
+                  onChange={(e) => setFormVendorId(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
-                  placeholder="e.g. PFIZER_INC"
+                  placeholder="e.g. VND-201"
                 />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Display Name
-                </label>
-                <input
-                  type="text"
-                  value={formDisplayName}
-                  onChange={(e) => setFormDisplayName(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
-                  placeholder="e.g. Pfizer India Ltd."
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Vendor Type
-                </label>
-                <select
-                  value={formVendorType}
-                  onChange={(e) => setFormVendorType(e.target.value as 'PHARMA_COMPANY' | 'VENDOR')}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium cursor-pointer"
-                >
-                  <option value="PHARMA_COMPANY">PHARMA_COMPANY</option>
-                  <option value="VENDOR">VENDOR</option>
-                </select>
               </div>
 
               <div className="space-y-1">
@@ -417,13 +362,25 @@ const VendorManagementPage = () => {
                 </label>
                 <select
                   value={formStatus}
-                  onChange={(e) => setFormStatus(e.target.value as 'ACTIVE' | 'SUSPENDED' | 'DEACTIVATED')}
+                  onChange={(e) => setFormStatus(e.target.value as 'ACTIVE' | 'EXPIRED' | 'PENDING')}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium cursor-pointer"
                 >
                   <option value="ACTIVE">ACTIVE</option>
-                  <option value="SUSPENDED">SUSPENDED</option>
-                  <option value="DEACTIVATED">DEACTIVATED</option>
+                  <option value="EXPIRED">EXPIRED</option>
+                  <option value="PENDING">PENDING</option>
                 </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  Licensed At
+                </label>
+                <input
+                  type="date"
+                  value={formLicensedAt}
+                  onChange={(e) => setFormLicensedAt(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                />
               </div>
             </div>
 
@@ -431,7 +388,7 @@ const VendorManagementPage = () => {
               <Button 
                 variant="outline" 
                 onClick={() => {
-                  setEditingVendor(null);
+                  setEditingSubscription(null);
                   setIsAdding(false);
                 }}
               >
@@ -446,19 +403,19 @@ const VendorManagementPage = () => {
 
         {/* Delete Confirmation Dialog */}
         <Dialog 
-          open={deletingVendor !== null} 
-          onOpenChange={(open) => !open && setDeletingVendor(null)}
+          open={deletingSubscription !== null} 
+          onOpenChange={(open) => !open && setDeletingSubscription(null)}
         >
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Confirm Delete</DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete <span className="font-semibold text-slate-950">{deletingVendor?.displayName}</span>? This action is permanent.
+                Are you sure you want to delete the subscription for <span className="font-semibold text-slate-950">{deletingSubscription?.vendorId}</span>? This action cannot be undone.
               </DialogDescription>
             </DialogHeader>
 
             <DialogFooter className="mt-4">
-              <Button variant="outline" onClick={() => setDeletingVendor(null)}>
+              <Button variant="outline" onClick={() => setDeletingSubscription(null)}>
                 Cancel
               </Button>
               <Button variant="destructive" onClick={handleConfirmDelete}>
@@ -472,4 +429,4 @@ const VendorManagementPage = () => {
   );
 };
 
-export default VendorManagementPage;
+export default SubscriptionManagementPage;
