@@ -31,132 +31,112 @@ import {
 } from '@/components/core-components/dialog';
 
 // ── Types ──────────────────────────────────────────────────────────────
-interface Vendor {
-  id: string;
-  name: string;
-  displayName: string;
-  vendorType: 'PHARMA_COMPANY' | 'VENDOR';
-  status: 'ACTIVE' | 'SUSPENDED' | 'DEACTIVATED';
-  createdAt: string;
-  updatedAt: string;
+interface PermissionGroup {
+  permissionGroupSysId: string;
+  permissionGroupName: string;
+  permissionGroupDesc: string;
+  createdOn: string;
+  updatedOn: string;
 }
 
 // ── Dummy data ─────────────────────────────────────────────────────────
-const DUMMY_VENDORS: Vendor[] = [
+const DUMMY_PERMISSION_GROUPS: PermissionGroup[] = [
   {
-    id: 'VND-001',
-    name: 'PFIZER_INC',
-    displayName: 'Pfizer India Ltd.',
-    vendorType: 'PHARMA_COMPANY',
-    status: 'ACTIVE',
-    createdAt: '2026-01-10T08:00:00Z',
-    updatedAt: '2026-06-15T10:30:00Z',
+    permissionGroupSysId: 'PG-001',
+    permissionGroupName: 'Dashboard Access',
+    permissionGroupDesc: 'Grants read-only access to all dashboard views and analytics.',
+    createdOn: '2026-01-05T08:00:00Z',
+    updatedOn: '2026-06-20T14:30:00Z',
   },
   {
-    id: 'VND-002',
-    name: 'LABCORP_TESTING',
-    displayName: 'LabCorp Testing Services',
-    vendorType: 'VENDOR',
-    status: 'ACTIVE',
-    createdAt: '2026-02-15T09:00:00Z',
-    updatedAt: '2026-02-15T09:00:00Z',
+    permissionGroupSysId: 'PG-002',
+    permissionGroupName: 'User Management',
+    permissionGroupDesc: 'Full CRUD permissions for managing system users.',
+    createdOn: '2026-02-10T10:15:00Z',
+    updatedOn: '2026-05-18T09:45:00Z',
   },
   {
-    id: 'VND-003',
-    name: 'MODERNA_BIOTECH',
-    displayName: 'Moderna Therapeutics',
-    vendorType: 'PHARMA_COMPANY',
-    status: 'SUSPENDED',
-    createdAt: '2025-06-01T12:00:00Z',
-    updatedAt: '2026-06-01T12:00:00Z',
+    permissionGroupSysId: 'PG-003',
+    permissionGroupName: 'Audit & Compliance',
+    permissionGroupDesc: 'Access to audit logs, compliance reports, and regulatory settings.',
+    createdOn: '2026-03-01T12:00:00Z',
+    updatedOn: '2026-07-01T16:00:00Z',
   },
   {
-    id: 'VND-004',
-    name: 'BIOTECH_EQUIPMENTS',
-    displayName: 'BioTech Labs & Instruments',
-    vendorType: 'VENDOR',
-    status: 'DEACTIVATED',
-    createdAt: '2026-07-01T14:00:00Z',
-    updatedAt: '2026-07-01T14:00:00Z',
+    permissionGroupSysId: 'PG-004',
+    permissionGroupName: 'Vendor Operations',
+    permissionGroupDesc: '',
+    createdOn: '2026-04-22T07:30:00Z',
+    updatedOn: '2026-04-22T07:30:00Z',
   },
 ];
 
 // ── Component ──────────────────────────────────────────────────────────
-const VendorManagementPage = () => {
-  const [data, setData] = useState<Vendor[]>(DUMMY_VENDORS);
-  const [editingVendor, setEditingVendor] = useState<Vendor | null>(null);
-  const [deletingVendor, setDeletingVendor] = useState<Vendor | null>(null);
+const PermissionGroupPage = () => {
+  const [data, setData] = useState<PermissionGroup[]>(DUMMY_PERMISSION_GROUPS);
+  const [editingGroup, setEditingGroup] = useState<PermissionGroup | null>(null);
+  const [deletingGroup, setDeletingGroup] = useState<PermissionGroup | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
   // Form states
   const [formName, setFormName] = useState('');
-  const [formDisplayName, setFormDisplayName] = useState('');
-  const [formVendorType, setFormVendorType] = useState<'PHARMA_COMPANY' | 'VENDOR'>('VENDOR');
-  const [formStatus, setFormStatus] = useState<'ACTIVE' | 'SUSPENDED' | 'DEACTIVATED'>('ACTIVE');
+  const [formDesc, setFormDesc] = useState('');
 
-  const handleEditClick = useCallback((vendor: Vendor) => {
-    setEditingVendor(vendor);
-    setFormName(vendor.name);
-    setFormDisplayName(vendor.displayName);
-    setFormVendorType(vendor.vendorType);
-    setFormStatus(vendor.status);
+  const handleEditClick = useCallback((group: PermissionGroup) => {
+    setEditingGroup(group);
+    setFormName(group.permissionGroupName);
+    setFormDesc(group.permissionGroupDesc);
   }, []);
 
-  const handleDeleteClick = useCallback((vendor: Vendor) => {
-    setDeletingVendor(vendor);
+  const handleDeleteClick = useCallback((group: PermissionGroup) => {
+    setDeletingGroup(group);
   }, []);
 
   const handleAddClick = () => {
     setIsAdding(true);
     setFormName('');
-    setFormDisplayName('');
-    setFormVendorType('VENDOR');
-    setFormStatus('ACTIVE');
+    setFormDesc('');
   };
 
   const handleSaveEdit = () => {
-    if (!editingVendor) return;
+    if (!editingGroup) return;
 
     setData((prev) =>
       prev.map((item) =>
-        item.id === editingVendor.id
+        item.permissionGroupSysId === editingGroup.permissionGroupSysId
           ? {
               ...item,
-              name: formName,
-              displayName: formDisplayName,
-              vendorType: formVendorType,
-              status: formStatus,
-              updatedAt: new Date().toISOString(),
+              permissionGroupName: formName,
+              permissionGroupDesc: formDesc,
+              updatedOn: new Date().toISOString(),
             }
           : item
       )
     );
-    setEditingVendor(null);
+    setEditingGroup(null);
   };
 
   const handleSaveAdd = () => {
-    const nextNum = data.length > 0 
-      ? Math.max(...data.map(d => parseInt(d.id.split('-')[1], 10))) + 1 
+    const nextNum = data.length > 0
+      ? Math.max(...data.map(d => parseInt(d.permissionGroupSysId.split('-')[1], 10))) + 1
       : 1;
     const paddedNum = String(nextNum).padStart(3, '0');
-    const newVendor: Vendor = {
-      id: `VND-${paddedNum}`,
-      name: formName.toUpperCase().replace(/\s+/g, '_') || `VENDOR_${paddedNum}`,
-      displayName: formDisplayName || `Vendor ${paddedNum}`,
-      vendorType: formVendorType,
-      status: formStatus,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+    const newGroup: PermissionGroup = {
+      permissionGroupSysId: `PG-${paddedNum}`,
+      permissionGroupName: formName,
+      permissionGroupDesc: formDesc,
+      createdOn: new Date().toISOString(),
+      updatedOn: new Date().toISOString(),
     };
 
-    setData((prev) => [...prev, newVendor]);
+    setData((prev) => [...prev, newGroup]);
     setIsAdding(false);
   };
 
   const handleConfirmDelete = () => {
-    if (!deletingVendor) return;
-    setData((prev) => prev.filter((item) => item.id !== deletingVendor.id));
-    setDeletingVendor(null);
+    if (!deletingGroup) return;
+    setData((prev) => prev.filter((item) => item.permissionGroupSysId !== deletingGroup.permissionGroupSysId));
+    setDeletingGroup(null);
   };
 
   const formatDate = (isoString: string) => {
@@ -169,102 +149,72 @@ const VendorManagementPage = () => {
 
   // ── Column definitions ─────────────────────────────────────────────────
   const columns = useMemo(() => {
-    const columnHelper = createColumnHelper<Vendor>();
+    const columnHelper = createColumnHelper<PermissionGroup>();
     return [
-      columnHelper.accessor('id', {
-        header: 'Vendor ID',
+      columnHelper.accessor('permissionGroupSysId', {
+        header: 'Group ID',
         cell: (info) => (
           <span className="font-mono text-xs text-muted-foreground">
             {info.getValue()}
           </span>
         ),
       }),
-      columnHelper.accessor('name', {
-        header: 'Name',
+      columnHelper.accessor('permissionGroupName', {
+        header: 'Group Name',
         cell: (info) => (
-          <span className="font-mono text-xs font-semibold text-slate-800">{info.getValue()}</span>
+          <span className="font-semibold text-slate-800">{info.getValue()}</span>
         ),
       }),
-      columnHelper.accessor('displayName', {
-        header: 'Display Name',
-        cell: (info) => (
-          <span className="font-semibold text-slate-750">{info.getValue()}</span>
-        ),
-      }),
-      columnHelper.accessor('vendorType', {
-        header: 'Vendor Type',
+      columnHelper.accessor('permissionGroupDesc', {
+        header: 'Description',
         cell: (info) => {
-          const type = info.getValue();
-          const isPharma = type === 'PHARMA_COMPANY';
+          const value = info.getValue();
           return (
-            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold border ${
-              isPharma 
-                ? 'bg-blue-50 text-blue-700 border-blue-200' 
-                : 'bg-indigo-50 text-indigo-700 border-indigo-200'
-            }`}>
-              {type === 'PHARMA_COMPANY' ? 'PHARMA COMPANY' : 'VENDOR'}
+            <span className="text-slate-500 text-sm">
+              {value || <span className="italic text-slate-400">—</span>}
             </span>
           );
         },
       }),
-      columnHelper.accessor('status', {
-        header: 'Status',
-        cell: (info) => {
-          const status = info.getValue();
-          let badgeClass = 'bg-slate-50 text-slate-700 border-slate-200';
-          if (status === 'ACTIVE') {
-            badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-          } else if (status === 'SUSPENDED') {
-            badgeClass = 'bg-amber-50 text-amber-700 border-amber-200';
-          } else if (status === 'DEACTIVATED') {
-            badgeClass = 'bg-rose-50 text-rose-700 border-rose-200';
-          }
-          return (
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${badgeClass}`}>
-              {status}
-            </span>
-          );
-        },
-      }),
-      columnHelper.accessor('createdAt', {
-        header: 'Created At',
+      columnHelper.accessor('createdOn', {
+        header: 'Created On',
         cell: (info) => formatDate(info.getValue()),
       }),
-      columnHelper.accessor('updatedAt', {
-        header: 'Updated At',
+      columnHelper.accessor('updatedOn', {
+        header: 'Updated On',
         cell: (info) => formatDate(info.getValue()),
       }),
       columnHelper.display({
         id: 'actions',
         header: () => <div className="text-right pr-4">Actions</div>,
         cell: (info) => {
-          const vendor = info.row.original;
+          const group = info.row.original;
           return (
             <div className="flex items-center justify-end gap-2 pr-2">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
-                    onClick={() => handleEditClick(vendor)}
+                    onClick={() => handleEditClick(group)}
                     className="p-1.5 rounded-md text-slate-500 hover:text-blue-600 hover:bg-slate-100 active:scale-95 transition-all duration-150 cursor-pointer"
                   >
                     <Pencil className="size-4.5" />
-                    <span className="sr-only">Edit Vendor</span>
+                    <span className="sr-only">Edit Permission Group</span>
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="right">Edit Vendor</TooltipContent>
+                <TooltipContent side="right">Edit Permission Group</TooltipContent>
               </Tooltip>
 
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
-                    onClick={() => handleDeleteClick(vendor)}
+                    onClick={() => handleDeleteClick(group)}
                     className="p-1.5 rounded-md text-slate-500 hover:text-red-600 hover:bg-slate-100 active:scale-95 transition-all duration-150 cursor-pointer"
                   >
                     <Trash2 className="size-4.5" />
-                    <span className="sr-only">Delete Vendor</span>
+                    <span className="sr-only">Delete Permission Group</span>
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="right">Delete Vendor</TooltipContent>
+                <TooltipContent side="right">Delete Permission Group</TooltipContent>
               </Tooltip>
             </div>
           );
@@ -289,15 +239,15 @@ const VendorManagementPage = () => {
               <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
                 System Administration
               </p>
-              <h1 className="mt-2 text-3xl font-bold">Vendor Management</h1>
+              <h1 className="mt-2 text-3xl font-bold">Permission Groups</h1>
               <p className="mt-3 text-slate-600">
-                Onboard, manage, and configure details of system vendors and pharmaceutical companies.
+                Create, organise, and manage permission groups to bundle related permissions together.
               </p>
             </div>
 
             <Button className="shrink-0" onClick={handleAddClick}>
               <Plus data-icon="inline-start" className="size-4" />
-              Add Vendor
+              Add Group
             </Button>
           </div>
 
@@ -341,7 +291,7 @@ const VendorManagementPage = () => {
                       colSpan={columns.length}
                       className="h-24 text-center text-muted-foreground"
                     >
-                      No vendors found.
+                      No permission groups found.
                     </TableCell>
                   </TableRow>
                 )}
@@ -351,11 +301,11 @@ const VendorManagementPage = () => {
         </section>
 
         {/* Add/Edit Form Dialog */}
-        <Dialog 
-          open={editingVendor !== null || isAdding} 
+        <Dialog
+          open={editingGroup !== null || isAdding}
           onOpenChange={(open) => {
             if (!open) {
-              setEditingVendor(null);
+              setEditingGroup(null);
               setIsAdding(false);
             }
           }}
@@ -363,75 +313,46 @@ const VendorManagementPage = () => {
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>
-                {isAdding ? 'Add Vendor' : 'Edit Vendor'}
+                {isAdding ? 'Add Permission Group' : 'Edit Permission Group'}
               </DialogTitle>
               <DialogDescription>
-                Provide details for the {isAdding ? 'new' : 'existing'} vendor account.
+                Fill in the details below to {isAdding ? 'create a new' : 'modify this'} permission group.
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 py-4">
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Vendor Name (System Key)
+                  Group Name
                 </label>
                 <input
                   type="text"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
-                  placeholder="e.g. PFIZER_INC"
+                  placeholder="e.g. Dashboard Access"
                 />
               </div>
 
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Display Name
+                  Description <span className="text-slate-400 font-normal normal-case">(optional)</span>
                 </label>
-                <input
-                  type="text"
-                  value={formDisplayName}
-                  onChange={(e) => setFormDisplayName(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
-                  placeholder="e.g. Pfizer India Ltd."
+                <textarea
+                  value={formDesc}
+                  onChange={(e) => setFormDesc(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium resize-none"
+                  placeholder="Briefly describe what this permission group controls"
                 />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Vendor Type
-                </label>
-                <select
-                  value={formVendorType}
-                  onChange={(e) => setFormVendorType(e.target.value as 'PHARMA_COMPANY' | 'VENDOR')}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium cursor-pointer"
-                >
-                  <option value="PHARMA_COMPANY">PHARMA_COMPANY</option>
-                  <option value="VENDOR">VENDOR</option>
-                </select>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Status
-                </label>
-                <select
-                  value={formStatus}
-                  onChange={(e) => setFormStatus(e.target.value as 'ACTIVE' | 'SUSPENDED' | 'DEACTIVATED')}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium cursor-pointer"
-                >
-                  <option value="ACTIVE">ACTIVE</option>
-                  <option value="SUSPENDED">SUSPENDED</option>
-                  <option value="DEACTIVATED">DEACTIVATED</option>
-                </select>
               </div>
             </div>
 
             <DialogFooter>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => {
-                  setEditingVendor(null);
+                  setEditingGroup(null);
                   setIsAdding(false);
                 }}
               >
@@ -445,20 +366,20 @@ const VendorManagementPage = () => {
         </Dialog>
 
         {/* Delete Confirmation Dialog */}
-        <Dialog 
-          open={deletingVendor !== null} 
-          onOpenChange={(open) => !open && setDeletingVendor(null)}
+        <Dialog
+          open={deletingGroup !== null}
+          onOpenChange={(open) => !open && setDeletingGroup(null)}
         >
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Confirm Delete</DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete <span className="font-semibold text-slate-950">{deletingVendor?.displayName}</span>? This action is permanent.
+                Are you sure you want to delete <span className="font-semibold text-slate-950">{deletingGroup?.permissionGroupName}</span>? This action cannot be undone.
               </DialogDescription>
             </DialogHeader>
 
             <DialogFooter className="mt-4">
-              <Button variant="outline" onClick={() => setDeletingVendor(null)}>
+              <Button variant="outline" onClick={() => setDeletingGroup(null)}>
                 Cancel
               </Button>
               <Button variant="destructive" onClick={handleConfirmDelete}>
@@ -472,4 +393,4 @@ const VendorManagementPage = () => {
   );
 };
 
-export default VendorManagementPage;
+export default PermissionGroupPage;

@@ -17,7 +17,7 @@ export const VaalProLayout: React.FC = () => {
 
           {/* Scrollable Content Viewport Container */}
           <div className="min-h-0 flex-1 overflow-y-auto">
-            <div className="min-h-full max-w-7xl mx-auto">
+            <div className="min-h-full w-full">
               <Outlet />
             </div>
           </div>

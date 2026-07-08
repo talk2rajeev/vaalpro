@@ -254,7 +254,7 @@ const SubscriptionManagementPage = () => {
   return (
     <TooltipProvider>
       <main className="min-h-screen bg-slate-50 p-8 text-slate-900">
-        <section className="mx-auto max-w-7xl">
+        <section className="w-full">
           {/* Header */}
           <div className="flex items-start justify-between">
             <div>
