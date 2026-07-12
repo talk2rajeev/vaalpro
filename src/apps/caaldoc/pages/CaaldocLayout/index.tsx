@@ -19,7 +19,7 @@ export const CaaldocLayout: React.FC = () => {
 
           {/* Scrollable Content Viewport Container */}
           <div className="min-h-0 flex-1 overflow-y-auto">
-            <div className="min-h-full w-full">
+            <div className="min-h-full w-full pt-5 px-7">
               {/* The individual sub-page or the Unauthorized Alert will mount precisely here */}
               <Outlet />
             </div>
