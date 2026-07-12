@@ -4,13 +4,10 @@ import {
   LayoutDashboard,
   ClipboardList,
   Settings,
-  LogOut,
   Building2,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
-import { logout } from '@/features/auth/authSlice';
-import { useDispatch } from 'react-redux';
 import {
   TooltipProvider,
   Tooltip,
@@ -48,7 +45,6 @@ const menuItems: MenuItem[] = [
 ];
 
 const Sidebar: React.FC = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -110,31 +106,6 @@ const Sidebar: React.FC = () => {
             return <React.Fragment key={item.path}>{buttonEl}</React.Fragment>;
           })}
         </nav>
-
-        {/* Bottom Footer Actions */}
-        <div className="p-4 border-t border-slate-100">
-          {isCollapsed ? (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => dispatch(logout())}
-                  className="flex items-center justify-center size-12 mx-auto rounded-xl text-red-500 hover:bg-red-50 transition-all cursor-pointer"
-                >
-                  <LogOut size={20} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="right">Logout</TooltipContent>
-            </Tooltip>
-          ) : (
-            <button
-              onClick={() => dispatch(logout())}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 transition-all font-medium cursor-pointer"
-            >
-              <LogOut size={20} />
-              <span className="whitespace-nowrap overflow-hidden text-ellipsis">Logout</span>
-            </button>
-          )}
-        </div>
       </aside>
     </TooltipProvider>
   );
