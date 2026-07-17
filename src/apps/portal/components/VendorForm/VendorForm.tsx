@@ -62,9 +62,10 @@ const VendorForm = ({ mode, open, onOpenChange, vendor }: VendorFormProps) => {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [createVendor, { isLoading: isCreating }] = useCreateVendorMutation();
   const [updateVendor, { isLoading: isUpdating }] = useUpdateVendorMutation();
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<VendorFormValues>({
+  const { register, handleSubmit, formState: { errors, isValid }, reset } = useForm<VendorFormValues>({
     resolver: zodResolver(vendorSchema),
     defaultValues: getDefaultValues(vendor),
+    mode: 'onChange',
   });
   const isSaving = isCreating || isUpdating;
 
@@ -103,7 +104,7 @@ const VendorForm = ({ mode, open, onOpenChange, vendor }: VendorFormProps) => {
     <DialogContent className="sm:max-w-6xl max-h-[85vh] p-0 flex flex-col">
       <div className="p-6 pb-2"><DialogHeader><DialogTitle>{isEdit ? 'Edit Vendor' : 'Add Vendor'}</DialogTitle><DialogDescription>Provide details for the {isEdit ? 'existing' : 'new'} vendor account.</DialogDescription></DialogHeader></div>
       <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
-        <div className="flex-1 overflow-y-auto border-y border-slate-100 px-6 py-4"><div className="grid grid-cols-1 gap-4 space-y-4 md:grid-cols-2">
+        <div className="flex-1 overflow-y-auto border-y border-slate-100 px-6 py-4"><div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {field('Vendor Name', 'vendorName', { wide: true, placeholder: 'e.g. Acme Corporation' })}
           {field('Vendor Code', 'vendorCode', { placeholder: 'e.g. VENDOR001' })}
           {field('Est. Year', 'yearEstablished', { type: 'number', placeholder: 'e.g. 2010' })}
@@ -117,7 +118,7 @@ const VendorForm = ({ mode, open, onOpenChange, vendor }: VendorFormProps) => {
           {field('PAN Number', 'panNumber', { placeholder: 'e.g. ABCDE1234F' })}
           {field('Logo URL', 'logoUrl', { wide: true, optional: true, placeholder: 'e.g. https://example.com/logo.png' })}
         </div></div>
-        <div className="p-6 pt-4">{saveError && <p className="mb-3 text-sm text-red-600">{saveError}</p>}<DialogFooter><Button type="button" variant="outline" onClick={() => handleOpenChange(false)} disabled={isSaving}>Cancel</Button><Button type="submit" disabled={isSaving}>{isSaving ? 'Saving...' : 'Save'}</Button></DialogFooter></div>
+        <div className="p-6 pt-4">{saveError && <p className="mb-3 text-sm text-red-600">{saveError}</p>}<DialogFooter><Button type="button" variant="outline" onClick={() => handleOpenChange(false)} disabled={isSaving}>Cancel</Button><Button type="submit" disabled={isSaving || !isValid}>{isSaving ? 'Saving...' : 'Save'}</Button></DialogFooter></div>
       </form>
     </DialogContent>
   </Dialog>;
