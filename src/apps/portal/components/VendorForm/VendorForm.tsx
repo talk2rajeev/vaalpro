@@ -101,7 +101,7 @@ const VendorForm = ({ mode, open, onOpenChange, vendor }: VendorFormProps) => {
 
   const isEdit = mode === 'edit';
   return <Dialog open={open} onOpenChange={handleOpenChange}>
-    <DialogContent className="sm:max-w-6xl max-h-[85vh] p-0 flex flex-col">
+    <DialogContent className="sm:max-w-6xl max-h-[85vh] p-0 flex flex-col" onInteractOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
       <div className="p-6 pb-2"><DialogHeader><DialogTitle>{isEdit ? 'Edit Vendor' : 'Add Vendor'}</DialogTitle><DialogDescription>Provide details for the {isEdit ? 'existing' : 'new'} vendor account.</DialogDescription></DialogHeader></div>
       <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
         <div className="flex-1 overflow-y-auto border-y border-slate-100 px-6 py-4"><div className="grid grid-cols-1 gap-4 md:grid-cols-2">
