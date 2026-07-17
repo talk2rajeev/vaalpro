@@ -121,7 +121,7 @@ const VendorManagementPage = () => {
     try {
       await deleteVendor(deletingVendor.vendorSysId).unwrap();
       setDeletingVendor(null);
-      
+
       // If we deleted the last item on the page and we're not on the first page, go back a page
       if (data && data.content.length === 1 && page > 0) {
         setPage((p) => p - 1);
@@ -279,9 +279,9 @@ const VendorManagementPage = () => {
                           {header.isPlaceholder
                             ? null
                             : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
                         </TableHead>
                       ))}
                     </TableRow>
@@ -365,8 +365,8 @@ const VendorManagementPage = () => {
         </section>
 
         {/* Add/Edit Form Dialog */}
-        <Dialog 
-          open={editingVendor !== null || isAdding} 
+        <Dialog
+          open={editingVendor !== null || isAdding}
           onOpenChange={(open) => {
             if (!open) {
               setEditingVendor(null);
@@ -374,194 +374,200 @@ const VendorManagementPage = () => {
             }
           }}
         >
-          <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                {isAdding ? 'Add Vendor' : 'Edit Vendor'}
-              </DialogTitle>
-              <DialogDescription>
-                Provide details for the {isAdding ? 'new' : 'existing'} vendor account.
-              </DialogDescription>
-            </DialogHeader>
+          <DialogContent className="sm:max-w-6xl max-h-[85vh] p-0 flex flex-col">
+            <div className="p-6 pb-2">
+              <DialogHeader>
+                <DialogTitle>
+                  {isAdding ? 'Add Vendor' : 'Edit Vendor'}
+                </DialogTitle>
+                <DialogDescription>
+                  Provide details for the {isAdding ? 'new' : 'existing'} vendor account.
+                </DialogDescription>
+              </DialogHeader>
+            </div>
 
-            <div className="space-y-4 py-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1 md:col-span-2">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Vendor Name
-                </label>
-                <input
-                  type="text"
-                  value={formVendorName}
-                  onChange={(e) => setFormVendorName(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
-                  placeholder="e.g. Acme Corporation"
-                />
-              </div>
+            <div className="flex-1 overflow-y-auto px-6 py-4 border-y border-slate-100">
+              <div className="space-y-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1 md:col-span-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Vendor Name
+                  </label>
+                  <input
+                    type="text"
+                    value={formVendorName}
+                    onChange={(e) => setFormVendorName(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                    placeholder="e.g. Acme Corporation"
+                  />
+                </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Vendor Code
-                </label>
-                <input
-                  type="text"
-                  value={formVendorCode}
-                  onChange={(e) => setFormVendorCode(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
-                  placeholder="e.g. VENDOR001"
-                />
-              </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Vendor Code
+                  </label>
+                  <input
+                    type="text"
+                    value={formVendorCode}
+                    onChange={(e) => setFormVendorCode(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                    placeholder="e.g. VENDOR001"
+                  />
+                </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Est. Year
-                </label>
-                <input
-                  type="number"
-                  value={formYearEstablished}
-                  onChange={(e) => setFormYearEstablished(Number(e.target.value))}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
-                  placeholder="e.g. 2010"
-                />
-              </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Est. Year
+                  </label>
+                  <input
+                    type="number"
+                    value={formYearEstablished}
+                    onChange={(e) => setFormYearEstablished(Number(e.target.value))}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                    placeholder="e.g. 2010"
+                  />
+                </div>
 
-              <div className="space-y-1 md:col-span-2">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Address Line 1
-                </label>
-                <input
-                  type="text"
-                  value={formAddressLine1}
-                  onChange={(e) => setFormAddressLine1(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
-                  placeholder="e.g. 123 Main Street"
-                />
-              </div>
+                <div className="space-y-1 md:col-span-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Address Line 1
+                  </label>
+                  <input
+                    type="text"
+                    value={formAddressLine1}
+                    onChange={(e) => setFormAddressLine1(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                    placeholder="e.g. 123 Main Street"
+                  />
+                </div>
 
-              <div className="space-y-1 md:col-span-2">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Address Line 2 (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={formAddressLine2}
-                  onChange={(e) => setFormAddressLine2(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
-                  placeholder="e.g. Suite 100"
-                />
-              </div>
+                <div className="space-y-1 md:col-span-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Address Line 2 (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={formAddressLine2}
+                    onChange={(e) => setFormAddressLine2(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                    placeholder="e.g. Suite 100"
+                  />
+                </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  City
-                </label>
-                <input
-                  type="text"
-                  value={formCity}
-                  onChange={(e) => setFormCity(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
-                  placeholder="e.g. New York"
-                />
-              </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    City
+                  </label>
+                  <input
+                    type="text"
+                    value={formCity}
+                    onChange={(e) => setFormCity(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                    placeholder="e.g. New York"
+                  />
+                </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  State
-                </label>
-                <input
-                  type="text"
-                  value={formState}
-                  onChange={(e) => setFormState(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
-                  placeholder="e.g. NY"
-                />
-              </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    State
+                  </label>
+                  <input
+                    type="text"
+                    value={formState}
+                    onChange={(e) => setFormState(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                    placeholder="e.g. NY"
+                  />
+                </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Postal Code
-                </label>
-                <input
-                  type="text"
-                  value={formPostalCode}
-                  onChange={(e) => setFormPostalCode(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
-                  placeholder="e.g. 10001"
-                />
-              </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Postal Code
+                  </label>
+                  <input
+                    type="text"
+                    value={formPostalCode}
+                    onChange={(e) => setFormPostalCode(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                    placeholder="e.g. 10001"
+                  />
+                </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Country
-                </label>
-                <input
-                  type="text"
-                  value={formCountry}
-                  onChange={(e) => setFormCountry(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
-                  placeholder="e.g. USA"
-                />
-              </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Country
+                  </label>
+                  <input
+                    type="text"
+                    value={formCountry}
+                    onChange={(e) => setFormCountry(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                    placeholder="e.g. USA"
+                  />
+                </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  GST Number
-                </label>
-                <input
-                  type="text"
-                  value={formGstNumber}
-                  onChange={(e) => setFormGstNumber(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
-                  placeholder="e.g. 29ABCDE1234F1Z5"
-                />
-              </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    GST Number
+                  </label>
+                  <input
+                    type="text"
+                    value={formGstNumber}
+                    onChange={(e) => setFormGstNumber(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                    placeholder="e.g. 29ABCDE1234F1Z5"
+                  />
+                </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  PAN Number
-                </label>
-                <input
-                  type="text"
-                  value={formPanNumber}
-                  onChange={(e) => setFormPanNumber(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
-                  placeholder="e.g. ABCDE1234F"
-                />
-              </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    PAN Number
+                  </label>
+                  <input
+                    type="text"
+                    value={formPanNumber}
+                    onChange={(e) => setFormPanNumber(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                    placeholder="e.g. ABCDE1234F"
+                  />
+                </div>
 
-              <div className="space-y-1 md:col-span-2">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Logo URL (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={formLogoUrl}
-                  onChange={(e) => setFormLogoUrl(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
-                  placeholder="e.g. https://example.com/logo.png"
-                />
+                <div className="space-y-1 md:col-span-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Logo URL (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={formLogoUrl}
+                    onChange={(e) => setFormLogoUrl(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                    placeholder="e.g. https://example.com/logo.png"
+                  />
+                </div>
               </div>
             </div>
 
-            <DialogFooter>
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setEditingVendor(null);
-                  setIsAdding(false);
-                }}
-              >
-                Cancel
-              </Button>
-              <Button onClick={isAdding ? handleSaveAdd : handleSaveEdit}>
-                Save
-              </Button>
-            </DialogFooter>
+            <div className="p-6 pt-4">
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setEditingVendor(null);
+                    setIsAdding(false);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button onClick={isAdding ? handleSaveAdd : handleSaveEdit}>
+                  Save
+                </Button>
+              </DialogFooter>
+            </div>
           </DialogContent>
         </Dialog>
 
         {/* Delete Confirmation Dialog */}
-        <Dialog 
-          open={deletingVendor !== null} 
+        <Dialog
+          open={deletingVendor !== null}
           onOpenChange={(open) => !open && setDeletingVendor(null)}
         >
           <DialogContent className="sm:max-w-md">
