@@ -6,10 +6,27 @@ type LoginCredentials = {
   password: string;
 };
 
-type LoginResponse = {
-  user?: string | null;
+type GenerateTokenResponse = {
   accessToken: string;
+  tokenType: string;
+  expiresIn: number;
+  refreshToken: string;
+  scope: string;
 };
+
+type ValidateTokenResponse = {
+  active: boolean;
+  exp: string;
+  iat: string;
+  typ: string;
+  email: string;
+  userId: string;
+  realmRoles: string[];
+};
+
+// Basic auth credential for the IAM validate-token introspection endpoint.
+// Move to a VITE_IAM_CLIENT_TOKEN env var if it ever needs to vary per environment.
+const IAM_CLIENT_BASIC = 'dmFhbGRvY19hcHA6aVFFajJrMkJiT0k4MVl2RGFtMHNBaWZoNlBaRXFuaUU=';
 
 export type ModuleResponse = {
   userId: string;
@@ -22,20 +39,35 @@ export type ModuleResponse = {
 
 export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    login: builder.mutation<LoginResponse, LoginCredentials>({
+    generateToken: builder.mutation<GenerateTokenResponse, LoginCredentials>({
       query: (credentials) => ({
-        url: '/auth/login',
+        url: '/iam/generate-token',
         method: 'POST',
-        body: credentials,
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          username: credentials.username,
+          password: credentials.password,
+        }),
       }),
     }),
-    refresh: builder.mutation<LoginResponse, void>({
+    validateToken: builder.mutation<ValidateTokenResponse, string>({
+      query: (accessToken) => ({
+        url: '/iam/validate-token',
+        method: 'POST',
+        headers: {
+          authorization: `Basic ${IAM_CLIENT_BASIC}`,
+          'content-type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({ token: accessToken }),
+      }),
+    }),
+    refresh: builder.mutation<GenerateTokenResponse, void>({
       query: () => ({
         url: '/auth/refresh',
         method: 'POST',
       }),
     }),
-    getUserPermissions: builder.query<UserPermission[], number>({
+    getUserPermissions: builder.query<UserPermission[], string>({
       query: (userId) => `/userpermissions/${userId}`,
     }),
     getModule: builder.query<ModuleResponse, void>({
@@ -44,4 +76,10 @@ export const authApi = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useLoginMutation, useRefreshMutation, useGetUserPermissionsQuery, useGetModuleQuery } = authApi;
+export const {
+  useGenerateTokenMutation,
+  useValidateTokenMutation,
+  useRefreshMutation,
+  useGetUserPermissionsQuery,
+  useGetModuleQuery,
+} = authApi;

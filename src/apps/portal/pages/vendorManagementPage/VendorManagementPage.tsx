@@ -14,7 +14,7 @@ import {
   TableCell,
 } from '@/components/core-components/table';
 import { Button } from '@/components/core-components/button';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, AlertCircle } from 'lucide-react';
 import {
   TooltipProvider,
   Tooltip,
@@ -29,210 +29,174 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/core-components/dialog';
-
-// ── Types ──────────────────────────────────────────────────────────────
-interface Vendor {
-  id: string;
-  name: string;
-  displayName: string;
-  vendorType: 'PHARMA_COMPANY' | 'VENDOR';
-  status: 'ACTIVE' | 'SUSPENDED' | 'DEACTIVATED';
-  createdAt: string;
-  updatedAt: string;
-}
-
-// ── Dummy data ─────────────────────────────────────────────────────────
-const DUMMY_VENDORS: Vendor[] = [
-  {
-    id: 'VND-001',
-    name: 'PFIZER_INC',
-    displayName: 'Pfizer India Ltd.',
-    vendorType: 'PHARMA_COMPANY',
-    status: 'ACTIVE',
-    createdAt: '2026-01-10T08:00:00Z',
-    updatedAt: '2026-06-15T10:30:00Z',
-  },
-  {
-    id: 'VND-002',
-    name: 'LABCORP_TESTING',
-    displayName: 'LabCorp Testing Services',
-    vendorType: 'VENDOR',
-    status: 'ACTIVE',
-    createdAt: '2026-02-15T09:00:00Z',
-    updatedAt: '2026-02-15T09:00:00Z',
-  },
-  {
-    id: 'VND-003',
-    name: 'MODERNA_BIOTECH',
-    displayName: 'Moderna Therapeutics',
-    vendorType: 'PHARMA_COMPANY',
-    status: 'SUSPENDED',
-    createdAt: '2025-06-01T12:00:00Z',
-    updatedAt: '2026-06-01T12:00:00Z',
-  },
-  {
-    id: 'VND-004',
-    name: 'BIOTECH_EQUIPMENTS',
-    displayName: 'BioTech Labs & Instruments',
-    vendorType: 'VENDOR',
-    status: 'DEACTIVATED',
-    createdAt: '2026-07-01T14:00:00Z',
-    updatedAt: '2026-07-01T14:00:00Z',
-  },
-];
+import {
+  useGetVendorsQuery,
+  useDeleteVendorMutation,
+} from '@/features/vendors/vendorApi';
+import type { Vendor } from '@/features/vendors/vendorTypes';
 
 // ── Component ──────────────────────────────────────────────────────────
 const VendorManagementPage = () => {
-  const [data, setData] = useState<Vendor[]>(DUMMY_VENDORS);
+  const [page, setPage] = useState(0);
+  const pageSize = 10;
+
+  const { data, isLoading, isError, error } = useGetVendorsQuery({
+    page,
+    size: pageSize,
+    sortBy: 'vendorSysId',
+    sortDir: 'asc',
+  });
+
+  const [deleteVendor, { isLoading: isDeleting }] = useDeleteVendorMutation();
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   const [editingVendor, setEditingVendor] = useState<Vendor | null>(null);
   const [deletingVendor, setDeletingVendor] = useState<Vendor | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
-  // Form states
-  const [formName, setFormName] = useState('');
-  const [formDisplayName, setFormDisplayName] = useState('');
-  const [formVendorType, setFormVendorType] = useState<'PHARMA_COMPANY' | 'VENDOR'>('VENDOR');
-  const [formStatus, setFormStatus] = useState<'ACTIVE' | 'SUSPENDED' | 'DEACTIVATED'>('ACTIVE');
+  // Form states (matching curl schema)
+  const [formVendorCode, setFormVendorCode] = useState('');
+  const [formVendorName, setFormVendorName] = useState('');
+  const [formAddressLine1, setFormAddressLine1] = useState('');
+  const [formAddressLine2, setFormAddressLine2] = useState('');
+  const [formCity, setFormCity] = useState('');
+  const [formState, setFormState] = useState('');
+  const [formPostalCode, setFormPostalCode] = useState('');
+  const [formCountry, setFormCountry] = useState('');
+  const [formGstNumber, setFormGstNumber] = useState('');
+  const [formPanNumber, setFormPanNumber] = useState('');
+  const [formYearEstablished, setFormYearEstablished] = useState<number>(2010);
+  const [formLogoUrl, setFormLogoUrl] = useState('');
 
   const handleEditClick = useCallback((vendor: Vendor) => {
     setEditingVendor(vendor);
-    setFormName(vendor.name);
-    setFormDisplayName(vendor.displayName);
-    setFormVendorType(vendor.vendorType);
-    setFormStatus(vendor.status);
+    setFormVendorCode(vendor.vendorCode);
+    setFormVendorName(vendor.vendorName);
+    setFormAddressLine1(vendor.addressLine1);
+    setFormAddressLine2(vendor.addressLine2 || '');
+    setFormCity(vendor.city);
+    setFormState(vendor.state);
+    setFormPostalCode(vendor.postalCode);
+    setFormCountry(vendor.country);
+    setFormGstNumber(vendor.gstNumber);
+    setFormPanNumber(vendor.panNumber);
+    setFormYearEstablished(vendor.yearEstablished);
+    setFormLogoUrl(vendor.logoUrl || '');
   }, []);
 
   const handleDeleteClick = useCallback((vendor: Vendor) => {
+    setDeleteError(null);
     setDeletingVendor(vendor);
   }, []);
 
   const handleAddClick = () => {
     setIsAdding(true);
-    setFormName('');
-    setFormDisplayName('');
-    setFormVendorType('VENDOR');
-    setFormStatus('ACTIVE');
+    setFormVendorCode('');
+    setFormVendorName('');
+    setFormAddressLine1('');
+    setFormAddressLine2('');
+    setFormCity('');
+    setFormState('');
+    setFormPostalCode('');
+    setFormCountry('');
+    setFormGstNumber('');
+    setFormPanNumber('');
+    setFormYearEstablished(2010);
+    setFormLogoUrl('');
   };
 
   const handleSaveEdit = () => {
-    if (!editingVendor) return;
-
-    setData((prev) =>
-      prev.map((item) =>
-        item.id === editingVendor.id
-          ? {
-              ...item,
-              name: formName,
-              displayName: formDisplayName,
-              vendorType: formVendorType,
-              status: formStatus,
-              updatedAt: new Date().toISOString(),
-            }
-          : item
-      )
-    );
+    // Stub for Phase 3
     setEditingVendor(null);
   };
 
   const handleSaveAdd = () => {
-    const nextNum = data.length > 0 
-      ? Math.max(...data.map(d => parseInt(d.id.split('-')[1], 10))) + 1 
-      : 1;
-    const paddedNum = String(nextNum).padStart(3, '0');
-    const newVendor: Vendor = {
-      id: `VND-${paddedNum}`,
-      name: formName.toUpperCase().replace(/\s+/g, '_') || `VENDOR_${paddedNum}`,
-      displayName: formDisplayName || `Vendor ${paddedNum}`,
-      vendorType: formVendorType,
-      status: formStatus,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    setData((prev) => [...prev, newVendor]);
+    // Stub for Phase 3
     setIsAdding(false);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!deletingVendor) return;
-    setData((prev) => prev.filter((item) => item.id !== deletingVendor.id));
-    setDeletingVendor(null);
-  };
+    setDeleteError(null);
+    try {
+      await deleteVendor(deletingVendor.vendorSysId).unwrap();
+      setDeletingVendor(null);
 
-  const formatDate = (isoString: string) => {
-    return new Date(isoString).toLocaleDateString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
+      // If we deleted the last item on the page and we're not on the first page, go back a page
+      if (data && data.content.length === 1 && page > 0) {
+        setPage((p) => p - 1);
+      }
+    } catch (err: any) {
+      setDeleteError(err?.data?.message || 'Failed to delete vendor');
+    }
   };
 
   // ── Column definitions ─────────────────────────────────────────────────
   const columns = useMemo(() => {
     const columnHelper = createColumnHelper<Vendor>();
     return [
-      columnHelper.accessor('id', {
-        header: 'Vendor ID',
+      columnHelper.accessor('logoUrl', {
+        header: 'Logo',
+        cell: (info) => {
+          const url = info.getValue();
+          return url ? (
+            <img
+              src={url}
+              alt="Logo"
+              className="size-8 rounded-full object-cover border border-slate-200"
+              onError={(e) => {
+                (e.target as HTMLElement).style.display = 'none';
+              }}
+            />
+          ) : (
+            <div className="size-8 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200 text-xs font-bold text-slate-500">
+              V
+            </div>
+          );
+        },
+      }),
+      columnHelper.accessor('vendorCode', {
+        header: 'Vendor Code',
         cell: (info) => (
-          <span className="font-mono text-xs text-muted-foreground">
+          <span className="font-mono text-xs font-bold text-slate-700">
             {info.getValue()}
           </span>
         ),
       }),
-      columnHelper.accessor('name', {
-        header: 'Name',
+      columnHelper.accessor('vendorName', {
+        header: 'Vendor Name',
         cell: (info) => (
-          <span className="font-mono text-xs font-semibold text-slate-800">{info.getValue()}</span>
+          <span className="font-semibold text-slate-800">{info.getValue()}</span>
         ),
       }),
-      columnHelper.accessor('displayName', {
-        header: 'Display Name',
-        cell: (info) => (
-          <span className="font-semibold text-slate-750">{info.getValue()}</span>
-        ),
-      }),
-      columnHelper.accessor('vendorType', {
-        header: 'Vendor Type',
+      columnHelper.accessor('city', {
+        header: 'Location',
         cell: (info) => {
-          const type = info.getValue();
-          const isPharma = type === 'PHARMA_COMPANY';
+          const row = info.row.original;
           return (
-            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold border ${
-              isPharma 
-                ? 'bg-blue-50 text-blue-700 border-blue-200' 
-                : 'bg-indigo-50 text-indigo-700 border-indigo-200'
-            }`}>
-              {type === 'PHARMA_COMPANY' ? 'PHARMA COMPANY' : 'VENDOR'}
+            <span className="text-slate-600">
+              {row.city}, {row.state}, {row.country}
             </span>
           );
         },
       }),
-      columnHelper.accessor('status', {
-        header: 'Status',
-        cell: (info) => {
-          const status = info.getValue();
-          let badgeClass = 'bg-slate-50 text-slate-700 border-slate-200';
-          if (status === 'ACTIVE') {
-            badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-          } else if (status === 'SUSPENDED') {
-            badgeClass = 'bg-amber-50 text-amber-700 border-amber-200';
-          } else if (status === 'DEACTIVATED') {
-            badgeClass = 'bg-rose-50 text-rose-700 border-rose-200';
-          }
-          return (
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${badgeClass}`}>
-              {status}
-            </span>
-          );
-        },
+      columnHelper.accessor('gstNumber', {
+        header: 'GST Number',
+        cell: (info) => (
+          <span className="font-mono text-xs text-slate-600">{info.getValue()}</span>
+        ),
       }),
-      columnHelper.accessor('createdAt', {
-        header: 'Created At',
-        cell: (info) => formatDate(info.getValue()),
+      columnHelper.accessor('panNumber', {
+        header: 'PAN Number',
+        cell: (info) => (
+          <span className="font-mono text-xs text-slate-600">{info.getValue()}</span>
+        ),
       }),
-      columnHelper.accessor('updatedAt', {
-        header: 'Updated At',
-        cell: (info) => formatDate(info.getValue()),
+      columnHelper.accessor('yearEstablished', {
+        header: 'Est. Year',
+        cell: (info) => (
+          <span className="text-slate-600">{info.getValue()}</span>
+        ),
       }),
       columnHelper.display({
         id: 'actions',
@@ -273,8 +237,10 @@ const VendorManagementPage = () => {
     ];
   }, [handleEditClick, handleDeleteClick]);
 
+  const vendorsList = useMemo(() => data?.content ?? [], [data]);
+
   const table = useReactTable({
-    data,
+    data: vendorsList,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -301,58 +267,106 @@ const VendorManagementPage = () => {
             </Button>
           </div>
 
-          {/* Table */}
-          <div className="mt-8 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <Table>
-              <TableHeader>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id} className="bg-slate-100/70">
-                    {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
+          {/* Table Container */}
+          {!isLoading && !isError && (
+            <div className="mt-8 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+              <Table>
+                <TableHeader>
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow key={headerGroup.id} className="bg-slate-100/70">
+                      {headerGroup.headers.map((header) => (
+                        <TableHead key={header.id}>
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(
                               header.column.columnDef.header,
                               header.getContext()
                             )}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableHeader>
-
-              <TableBody>
-                {table.getRowModel().rows.length ? (
-                  table.getRowModel().rows.map((row) => (
-                    <TableRow key={row.id}>
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </TableCell>
+                        </TableHead>
                       ))}
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell
-                      colSpan={columns.length}
-                      className="h-24 text-center text-muted-foreground"
-                    >
-                      No vendors found.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                  ))}
+                </TableHeader>
+
+                <TableBody>
+                  {table.getRowModel().rows.length ? (
+                    table.getRowModel().rows.map((row) => (
+                      <TableRow key={row.id}>
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id}>
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell
+                        colSpan={columns.length}
+                        className="h-24 text-center text-muted-foreground"
+                      >
+                        No vendors found.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+
+          {/* Loading state */}
+          {isLoading && (
+            <div className="mt-8 flex items-center justify-center p-12 bg-white border border-slate-200 rounded-xl shadow-sm min-h-[300px]">
+              <Loader2 className="animate-spin text-blue-600 size-8 mr-3" />
+              <span className="text-slate-600 font-medium text-lg">Loading vendors...</span>
+            </div>
+          )}
+
+          {/* Error state */}
+          {isError && (
+            <div className="mt-8 flex items-center gap-3 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl">
+              <AlertCircle className="size-5 shrink-0" />
+              <div>
+                <p className="font-semibold">Failed to load vendors</p>
+                <p className="text-sm opacity-90">{(error as any)?.data?.message || 'An unexpected error occurred.'}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Pagination Bar */}
+          {data && data.totalPages > 1 && (
+            <div className="mt-4 flex items-center justify-between px-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm">
+              <div className="text-sm text-slate-600">
+                Showing page <span className="font-semibold">{data.pageNumber + 1}</span> of <span className="font-semibold">{data.totalPages}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  disabled={data.pageNumber === 0}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={data.last || data.pageNumber + 1 >= data.totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </section>
 
         {/* Add/Edit Form Dialog */}
-        <Dialog 
-          open={editingVendor !== null || isAdding} 
+        <Dialog
+          open={editingVendor !== null || isAdding}
           onOpenChange={(open) => {
             if (!open) {
               setEditingVendor(null);
@@ -360,109 +374,230 @@ const VendorManagementPage = () => {
             }
           }}
         >
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>
-                {isAdding ? 'Add Vendor' : 'Edit Vendor'}
-              </DialogTitle>
-              <DialogDescription>
-                Provide details for the {isAdding ? 'new' : 'existing'} vendor account.
-              </DialogDescription>
-            </DialogHeader>
+          <DialogContent className="sm:max-w-6xl max-h-[85vh] p-0 flex flex-col">
+            <div className="p-6 pb-2">
+              <DialogHeader>
+                <DialogTitle>
+                  {isAdding ? 'Add Vendor' : 'Edit Vendor'}
+                </DialogTitle>
+                <DialogDescription>
+                  Provide details for the {isAdding ? 'new' : 'existing'} vendor account.
+                </DialogDescription>
+              </DialogHeader>
+            </div>
 
-            <div className="space-y-4 py-4">
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Vendor Name (System Key)
-                </label>
-                <input
-                  type="text"
-                  value={formName}
-                  onChange={(e) => setFormName(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
-                  placeholder="e.g. PFIZER_INC"
-                />
-              </div>
+            <div className="flex-1 overflow-y-auto px-6 py-4 border-y border-slate-100">
+              <div className="space-y-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1 md:col-span-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Vendor Name
+                  </label>
+                  <input
+                    type="text"
+                    value={formVendorName}
+                    onChange={(e) => setFormVendorName(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                    placeholder="e.g. Acme Corporation"
+                  />
+                </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Display Name
-                </label>
-                <input
-                  type="text"
-                  value={formDisplayName}
-                  onChange={(e) => setFormDisplayName(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
-                  placeholder="e.g. Pfizer India Ltd."
-                />
-              </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Vendor Code
+                  </label>
+                  <input
+                    type="text"
+                    value={formVendorCode}
+                    onChange={(e) => setFormVendorCode(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                    placeholder="e.g. VENDOR001"
+                  />
+                </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Vendor Type
-                </label>
-                <select
-                  value={formVendorType}
-                  onChange={(e) => setFormVendorType(e.target.value as 'PHARMA_COMPANY' | 'VENDOR')}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium cursor-pointer"
-                >
-                  <option value="PHARMA_COMPANY">PHARMA_COMPANY</option>
-                  <option value="VENDOR">VENDOR</option>
-                </select>
-              </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Est. Year
+                  </label>
+                  <input
+                    type="number"
+                    value={formYearEstablished}
+                    onChange={(e) => setFormYearEstablished(Number(e.target.value))}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                    placeholder="e.g. 2010"
+                  />
+                </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Status
-                </label>
-                <select
-                  value={formStatus}
-                  onChange={(e) => setFormStatus(e.target.value as 'ACTIVE' | 'SUSPENDED' | 'DEACTIVATED')}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium cursor-pointer"
-                >
-                  <option value="ACTIVE">ACTIVE</option>
-                  <option value="SUSPENDED">SUSPENDED</option>
-                  <option value="DEACTIVATED">DEACTIVATED</option>
-                </select>
+                <div className="space-y-1 md:col-span-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Address Line 1
+                  </label>
+                  <input
+                    type="text"
+                    value={formAddressLine1}
+                    onChange={(e) => setFormAddressLine1(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                    placeholder="e.g. 123 Main Street"
+                  />
+                </div>
+
+                <div className="space-y-1 md:col-span-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Address Line 2 (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={formAddressLine2}
+                    onChange={(e) => setFormAddressLine2(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                    placeholder="e.g. Suite 100"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    City
+                  </label>
+                  <input
+                    type="text"
+                    value={formCity}
+                    onChange={(e) => setFormCity(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                    placeholder="e.g. New York"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    State
+                  </label>
+                  <input
+                    type="text"
+                    value={formState}
+                    onChange={(e) => setFormState(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                    placeholder="e.g. NY"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Postal Code
+                  </label>
+                  <input
+                    type="text"
+                    value={formPostalCode}
+                    onChange={(e) => setFormPostalCode(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                    placeholder="e.g. 10001"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Country
+                  </label>
+                  <input
+                    type="text"
+                    value={formCountry}
+                    onChange={(e) => setFormCountry(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                    placeholder="e.g. USA"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    GST Number
+                  </label>
+                  <input
+                    type="text"
+                    value={formGstNumber}
+                    onChange={(e) => setFormGstNumber(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                    placeholder="e.g. 29ABCDE1234F1Z5"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    PAN Number
+                  </label>
+                  <input
+                    type="text"
+                    value={formPanNumber}
+                    onChange={(e) => setFormPanNumber(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                    placeholder="e.g. ABCDE1234F"
+                  />
+                </div>
+
+                <div className="space-y-1 md:col-span-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Logo URL (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={formLogoUrl}
+                    onChange={(e) => setFormLogoUrl(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-900 font-medium"
+                    placeholder="e.g. https://example.com/logo.png"
+                  />
+                </div>
               </div>
             </div>
 
-            <DialogFooter>
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setEditingVendor(null);
-                  setIsAdding(false);
-                }}
-              >
-                Cancel
-              </Button>
-              <Button onClick={isAdding ? handleSaveAdd : handleSaveEdit}>
-                Save
-              </Button>
-            </DialogFooter>
+            <div className="p-6 pt-4">
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setEditingVendor(null);
+                    setIsAdding(false);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button onClick={isAdding ? handleSaveAdd : handleSaveEdit}>
+                  Save
+                </Button>
+              </DialogFooter>
+            </div>
           </DialogContent>
         </Dialog>
 
         {/* Delete Confirmation Dialog */}
-        <Dialog 
-          open={deletingVendor !== null} 
+        <Dialog
+          open={deletingVendor !== null}
           onOpenChange={(open) => !open && setDeletingVendor(null)}
         >
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Confirm Delete</DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete <span className="font-semibold text-slate-950">{deletingVendor?.displayName}</span>? This action is permanent.
+                Are you sure you want to delete <span className="font-semibold text-slate-950">{deletingVendor?.vendorName}</span>? This action is permanent.
               </DialogDescription>
             </DialogHeader>
 
+            {deleteError && (
+              <div className="mt-2 flex items-center gap-2 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+                <AlertCircle className="size-4 shrink-0" />
+                <span>{deleteError}</span>
+              </div>
+            )}
+
             <DialogFooter className="mt-4">
-              <Button variant="outline" onClick={() => setDeletingVendor(null)}>
+              <Button variant="outline" onClick={() => setDeletingVendor(null)} disabled={isDeleting}>
                 Cancel
               </Button>
-              <Button variant="destructive" onClick={handleConfirmDelete}>
-                Delete
+              <Button variant="destructive" onClick={handleConfirmDelete} disabled={isDeleting}>
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="animate-spin size-4 mr-2" />
+                    Deleting...
+                  </>
+                ) : (
+                  'Delete'
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>

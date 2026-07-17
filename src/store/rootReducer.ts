@@ -1,10 +1,10 @@
 import { combineReducers } from '@reduxjs/toolkit';
 import { apiSlice } from '@/apps/shared/api/apiSlice';
-import todoReducer from '@/features/todos/todoSlice';
 import authReducer from '@/features/auth/authSlice';
+import vendorUiReducer from '@/features/vendors/vendorSlice';
 
 export const rootReducer = combineReducers({
   [apiSlice.reducerPath]: apiSlice.reducer,
-  todos: todoReducer,
   auth: authReducer,
+  vendorUi: vendorUiReducer,
 });

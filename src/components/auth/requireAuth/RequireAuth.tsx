@@ -2,10 +2,13 @@ import { useEffect, useRef } from 'react';
 import { Outlet, Navigate, useLocation, useNavigate } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '@/store/store';
-import { useRefreshMutation, useGetUserPermissionsQuery, useGetModuleQuery } from '@/features/auth/authApi';
+import { useRefreshMutation, useValidateTokenMutation, useGetUserPermissionsQuery, useGetModuleQuery } from '@/features/auth/authApi';
 import { setCredentials, setPermissions, setModuleData, logout } from '@/features/auth/authSlice';
 import { Loader2 } from 'lucide-react';
-import { decodeJwtPayload } from '@/utils/jwt';
+
+// Checks whether an RTK Query error is an HTTP 404
+const is404 = (error: unknown): boolean =>
+  !!error && typeof error === 'object' && 'status' in error && (error as { status: unknown }).status === 404;
 
 // ---------------------------------------------------------------------------
 // RequireAuth
@@ -17,10 +20,11 @@ import { decodeJwtPayload } from '@/utils/jwt';
  * Flow:
  *  1. If `accessToken` is missing → call `useRefreshMutation` to restore the
  *     JWT from the httpOnly refresh-token cookie.
- *  2. Decode the (restored) token to extract `userId`.
- *  3. Dispatch `setCredentials` with the token + userId.
- *  4. Fetch permissions via `useGetUserPermissionsQuery(userId)` and commit
- *     them to the store via `setPermissions`.
+ *  2. Call `/iam/validate-token` to decode the token and extract userId,
+ *     email, realmRoles.
+ *  3. Dispatch `setCredentials` with the token + validated identity.
+ *  4. Fetch module data via `useGetModuleQuery` and permissions via
+ *     `useGetUserPermissionsQuery(userId)`, committing both to the store.
  *  5. Render `<Outlet />` once everything is ready; show a loader in between;
  *     redirect to /login on any failure.
  */
@@ -28,11 +32,12 @@ const RequireAuth = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
-  const { accessToken, userId, isAuthChecked, isPermissionsLoaded, isModuleLoaded, moduleData } = useSelector(
+  const { accessToken, userId, realmRoles, exp, isAuthChecked, isPermissionsLoaded, isModuleLoaded, moduleData } = useSelector(
     (state: RootState) => state.auth
   );
 
   const [refresh, { isLoading: isRefreshing }] = useRefreshMutation();
+  const [validateToken] = useValidateTokenMutation();
 
   // Guard against double-firing in StrictMode / re-renders
   const hasAttemptedRefresh = useRef(false);
@@ -47,29 +52,73 @@ const RequireAuth = () => {
 
     (async () => {
       try {
+        // Step 1: Refresh — get a new access token from the httpOnly cookie
         const userData = await refresh().unwrap();
-        const payload = decodeJwtPayload(userData.accessToken);
-        const resolvedUserId =
-          typeof payload?.userId === 'number' ? payload.userId : null;
 
-        // without a valid userId, we can't proceed to fetch permissions, so we log the user out
-        if (!resolvedUserId) {
+        // Step 2: Validate — decode the token server-side
+        const validated = await validateToken(userData.accessToken).unwrap();
+
+        if (!validated.active || !validated.userId) {
           dispatch(logout());
           return;
-        }  
+        }
 
+        // Step 3: Store credentials
         dispatch(
           setCredentials({
-            user: userData.user ?? null,
+            user: validated.email ?? null,
             accessToken: userData.accessToken,
-            userId: resolvedUserId,
+            userId: validated.userId,
+            email: validated.email,
+            refreshToken: userData.refreshToken,
+            realmRoles: validated.realmRoles,
+            exp: validated.exp,
           })
         );
       } catch {
         dispatch(logout());
       }
     })();
-  }, [accessToken, isAuthChecked, dispatch, refresh]);
+  }, [accessToken, isAuthChecked, dispatch, refresh, validateToken]);
+
+  // ------------------------------------------------------------------
+  // Auto-refresh token before expiration
+  // ------------------------------------------------------------------
+  useEffect(() => {
+    if (!accessToken || !exp) return;
+
+    // Refresh 30 seconds before expiration
+    const refreshBufferSeconds = 30;
+    const timeUntilRefreshSeconds = exp - Math.floor(Date.now() / 1000) - refreshBufferSeconds;
+    const delayMs = Math.max(timeUntilRefreshSeconds, 0) * 1000;
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        const userData = await refresh().unwrap();
+        const validated = await validateToken(userData.accessToken).unwrap();
+
+        if (validated.active && validated.userId) {
+          dispatch(
+            setCredentials({
+              user: validated.email ?? null,
+              accessToken: userData.accessToken,
+              userId: validated.userId,
+              email: validated.email,
+              refreshToken: userData.refreshToken,
+              realmRoles: validated.realmRoles,
+              exp: validated.exp,
+            })
+          );
+        } else {
+          dispatch(logout());
+        }
+      } catch {
+        dispatch(logout());
+      }
+    }, delayMs);
+
+    return () => clearTimeout(timeoutId);
+  }, [accessToken, exp, refresh, validateToken, dispatch]);
 
   // ------------------------------------------------------------------
   // Step 4: Fetch module data once accessToken is available
@@ -78,6 +127,7 @@ const RequireAuth = () => {
     data: moduleDataResponse,
     isSuccess: moduleSuccess,
     isError: moduleError,
+    error: moduleQueryError,
   } = useGetModuleQuery(undefined, { skip: !accessToken || isModuleLoaded });
 
   // Step 5: Commit module data to the store
@@ -87,12 +137,30 @@ const RequireAuth = () => {
     }
   }, [moduleSuccess, moduleDataResponse, dispatch]);
 
-  // If module data fails to load, end the session
+  // If module data fails to load:
+  //  - 404 → backend not available yet; fall back using Redux store credentials
+  //  - other errors → end the session
   useEffect(() => {
-    if (moduleError) {
-      dispatch(logout());
+    if (!moduleError) return;
+
+    if (is404(moduleQueryError) && accessToken) {
+      dispatch(
+        setModuleData({
+          userId: userId ?? '',
+          tenantId: '',
+          userType: (realmRoles.includes('PLATFORM_ADMIN')
+            ? 'PLATFORM_ADMIN'
+            : 'USER') as 'PLATFORM_ADMIN' | 'ADMIN' | 'USER',
+          subscribed_apps: [],
+          exp: 0,
+          iat: 0,
+        })
+      );
+      return;
     }
-  }, [moduleError, dispatch]);
+
+    dispatch(logout());
+  }, [moduleError, moduleQueryError, accessToken, userId, realmRoles, dispatch]);
 
   // ------------------------------------------------------------------
   // Step 6: Fetch permissions once userId is available
@@ -101,6 +169,7 @@ const RequireAuth = () => {
     data: permissionsData,
     isSuccess: permissionsSuccess,
     isError: permissionsError,
+    error: permissionsQueryError,
   } = useGetUserPermissionsQuery(userId!, { skip: !userId });
 
   // Step 7: Commit permissions to the store
@@ -110,29 +179,39 @@ const RequireAuth = () => {
     }
   }, [permissionsSuccess, permissionsData, dispatch]);
 
-  // If permissions fails to load we cant make access decisions; end the
-  // session rahter than leaving hte user stuck on the loader forever.
+  // If permissions fail to load:
+  //  - 404 → backend not available yet; fall back to empty permissions
+  //  - other errors → end the session
   useEffect(() => {
-    if (permissionsError) {
-      dispatch(logout());
+    if (!permissionsError) return;
+
+    if (is404(permissionsQueryError)) {
+      dispatch(setPermissions([]));
+      return;
     }
-  }, [permissionsError, dispatch]);
+
+    dispatch(logout());
+  }, [permissionsError, permissionsQueryError, dispatch]);
 
   // ------------------------------------------------------------------
   // Step 8: Redirect PLATFORM_ADMIN users to /system-admin
+  // Role is read from realmRoles (set at login from validate-token);
+  // moduleData.userType is a fallback for sessions restored another way.
   // ------------------------------------------------------------------
   useEffect(() => {
     if (!moduleData) return;
-    
-    const isAccessingAdminZone = location.pathname.startsWith('/system-admin');
 
-    if (moduleData.userType === 'PLATFORM_ADMIN') {
+    const isAccessingAdminZone = location.pathname.startsWith('/system-admin');
+    const isPlatformAdmin =
+      realmRoles.includes('PLATFORM_ADMIN') || moduleData.userType === 'PLATFORM_ADMIN';
+
+    if (isPlatformAdmin) {
       // Platform admins are restricted to the /system-admin ecosystem
       if (!isAccessingAdminZone) {
         navigate('/system-admin', { replace: true });
       }
     }
-  }, [moduleData, location.pathname, navigate]);
+  }, [moduleData, realmRoles, location.pathname, navigate]);
 
   // ------------------------------------------------------------------
   // UI States
