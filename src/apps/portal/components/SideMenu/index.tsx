@@ -26,39 +26,39 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   {
-    label: 'Users',
-    path: '/system-admin/users',
-    icon: <Users size={20} />,
-  },
-  {
     label: 'Vendors',
     path: '/system-admin/vendors',
     icon: <Store size={20} />,
   },
   {
-    label: 'Roles',
-    path: '/system-admin/roles',
-    icon: <ShieldCheck size={20} />,
+    label: 'Vendor Employees',
+    path: '/system-admin/users',
+    icon: <Users size={20} />,
   },
+  // {
+  //   label: 'Roles',
+  //   path: '/system-admin/roles',
+  //   icon: <ShieldCheck size={20} />,
+  // },
+  // {
+  //   label: 'Permissions',
+  //   path: '/system-admin/permissions',
+  //   icon: <KeyRound size={20} />,
+  // },
+  // {
+  //   label: 'Permission Groups',
+  //   path: '/system-admin/permission-groups',
+  //   icon: <Shield size={20} />,
+  // },
   {
-    label: 'Permissions',
-    path: '/system-admin/permissions',
-    icon: <KeyRound size={20} />,
-  },
-  {
-    label: 'Permission Groups',
-    path: '/system-admin/permission-groups',
-    icon: <Shield size={20} />,
+    label: 'Vendor Customer',
+    path: '/system-admin/manage-vendor-customer',
+    icon: <Building2 size={20} />,
   },
   {
     label: 'Subscriptions',
     path: '/system-admin/subscriptions',
     icon: <CreditCard size={20} />,
-  },
-  {
-    label: 'Manage Vendor Customer',
-    path: '/system-admin/manage-vendor-customer',
-    icon: <Building2 size={20} />,
   },
 ];
 
