@@ -9,7 +9,7 @@ import SettingsPage from '@/apps/caaldoc/pages/SettingsPage';
 import VaaldocComingSoonPage from '@/apps/vaaldoc/pages/VaaldocComingSoonPage';
 import { CaaldocLayout } from '@/apps/caaldoc/pages/CaaldocLayout';
 import { VaalProLayout } from '@/apps/portal/components/VaalProLayout';
-import UsersManagementPage from '@/apps/portal/pages/usersManagementPage/UsersManagementPage';
+import VendorEmployeeManagementPage from '@/apps/portal/pages/VendorEmployeeManagementPage/VendorEmployeeManagementPage';
 import VendorManagementPage from '@/apps/portal/pages/vendorManagementPage/VendorManagementPage';
 import RoleManagementPage from '@/apps/portal/pages/roleManagementPage/RoleManagementPage';
 import PermissionManagementPage from '@/apps/portal/pages/permissionManagementPage/PermissionManagementPage';
@@ -40,11 +40,11 @@ const routes = [
         children: [
           {
             index: true,
-            element: <Navigate to="/system-admin/users" replace />,
+            element: <Navigate to="/system-admin/vendor-employee" replace />,
           },
           {
-            path: 'users',
-            element: <UsersManagementPage />,
+            path: 'vendor-employee',
+            element: <VendorEmployeeManagementPage />,
           },
           {
             path: 'vendors',

@@ -32,7 +32,7 @@ const menuItems: MenuItem[] = [
   },
   {
     label: 'Vendor Employees',
-    path: '/system-admin/users',
+    path: '/system-admin/vendor-employee',
     icon: <Users size={20} />,
   },
   // {
