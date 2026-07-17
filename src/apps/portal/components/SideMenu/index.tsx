@@ -7,6 +7,7 @@ import {
   KeyRound,
   Shield,
   CreditCard,
+  Building2,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
@@ -53,6 +54,11 @@ const menuItems: MenuItem[] = [
     label: 'Subscriptions',
     path: '/system-admin/subscriptions',
     icon: <CreditCard size={20} />,
+  },
+  {
+    label: 'Manage Vendor Customer',
+    path: '/system-admin/manage-vendor-customer',
+    icon: <Building2 size={20} />,
   },
 ];
 

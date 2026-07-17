@@ -15,6 +15,7 @@ import RoleManagementPage from '@/apps/portal/pages/roleManagementPage/RoleManag
 import PermissionManagementPage from '@/apps/portal/pages/permissionManagementPage/PermissionManagementPage';
 import PermissionGroupPage from '@/apps/portal/pages/permissionGroupPage/PermissionGroupPage';
 import SubscriptionManagementPage from '@/apps/portal/pages/subscriptionManagementPage/SubscriptionManagementPage';
+import VendorCustomerManagementPage from '@/apps/portal/pages/VendorCustomerManagementPage/VendorCustomerManagementPage';
 import RequireAuth from '@/components/auth/requireAuth/RequireAuth';
 import ModuleGuard from '@/components/auth/moduleGuard/ModuleGuard';
 import RouteGuard from '@/components/auth/routeGuard/RouteGuard';
@@ -64,6 +65,10 @@ const routes = [
           {
             path: 'subscriptions',
             element: <SubscriptionManagementPage />,
+          },
+          {
+            path: 'manage-vendor-customer',
+            element: <VendorCustomerManagementPage />,
           },
         ],
       },
