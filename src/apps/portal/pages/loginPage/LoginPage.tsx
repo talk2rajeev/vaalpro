@@ -3,10 +3,9 @@ import { motion } from 'motion/react';
 import { Lock, User, CheckCircle2 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '@/features/auth/authSlice';
-import { useLoginMutation } from '@/features/auth/authApi';
-import { useNavigate, useLocation } from 'react-router';
+import { useGenerateTokenMutation, useValidateTokenMutation } from '@/features/auth/authApi';
+import { useNavigate } from 'react-router';
 import { Button } from '@/components/core-components/button';
-import { decodeJwtPayload } from '@/utils/jwt';
 
 type LoginError = {
   status?: number;
@@ -24,37 +23,45 @@ export const LoginPage: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
 
-  //where to send the user after login, 
-  // the route they weer bounced from OR the dashboard by default
-  const from = (location.state as { from?: { pathname: string } } | null)?.from?.pathname ?? '/dashboard';
-
-  const [login, { isLoading: isLoggingIn }] = useLoginMutation();
+  const [generateToken, { isLoading: isGeneratingToken }] = useGenerateTokenMutation();
+  const [validateToken, { isLoading: isValidatingToken }] = useValidateTokenMutation();
+  const isLoggingIn = isGeneratingToken || isValidatingToken;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
     try {
-      // Step 1: Authenticate
-      const userData = await login({ username, password }).unwrap();
+      // Step 1: Authenticate — exchange credentials for an access token
+      const tokenData = await generateToken({ username, password }).unwrap();
 
-      // Step 2: Decode the access token to extract userId
-      const payload = decodeJwtPayload(userData.accessToken);
-      const userId = typeof payload?.userId === 'number' ? payload.userId : null;
+      // Step 2: Validate the access token to confirm the session and read the
+      // user's identity + realm roles.
+      const validated = await validateToken(tokenData.accessToken).unwrap();
 
-      // Step 3: Store credentials. permission loading is owned by RequireAuth
-      // which holds the destination route euntil permissions resolve.
+      if (!validated.active) {
+        setErrorMsg('Unauthorized');
+        return;
+      }
+
+      // Step 3: Store credentials. Permission/module loading is owned by RequireAuth
+      // which holds the destination route until permissions resolve.
       dispatch(
         setCredentials({
-          user: userData.user ?? username,
-          accessToken: userData.accessToken,
-          userId,
+          user: validated.email ?? username,
+          accessToken: tokenData.accessToken,
+          userId: validated.userId,
+          email: validated.email,
+          refreshToken: tokenData.refreshToken,
+          realmRoles: validated.realmRoles,
+          exp: validated.exp,
         })
       );
 
-      // Step 4: Navigate; RequireAuth shows its loader while permissions load.
-      navigate(from, { replace: true });
+      // Step 4: Route by role. PLATFORM_ADMIN -> system-admin ecosystem;
+      // CUSTOMER_USER / VENDOR_USER -> dashboard (under ModuleGuard).
+      const isAdmin = validated.realmRoles.includes('PLATFORM_ADMIN');
+      navigate(isAdmin ? '/system-admin' : '/dashboard', { replace: true });
     } catch (err: unknown) {
       if (!isLoginError(err) || !err.status) {
         setErrorMsg('No Server Response');
