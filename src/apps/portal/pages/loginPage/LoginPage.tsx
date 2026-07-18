@@ -61,7 +61,15 @@ export const LoginPage: React.FC = () => {
       // Step 4: Route by role. PLATFORM_ADMIN -> system-admin ecosystem;
       // CUSTOMER_USER / VENDOR_USER -> dashboard (under ModuleGuard).
       const isAdmin = validated.realmRoles.includes('PLATFORM_ADMIN');
-      navigate(isAdmin ? '/system-admin' : '/dashboard', { replace: true });
+      const isCustomerOrVendor = validated.realmRoles.includes('CUSTOMER_USER') || validated.realmRoles.includes('VENDOR_USER');
+
+      if (isAdmin) {
+        navigate('/system-admin', { replace: true });
+      } else if (isCustomerOrVendor) {
+        navigate('/dashboard', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     } catch (err: unknown) {
       if (!isLoginError(err) || !err.status) {
         setErrorMsg('No Server Response');

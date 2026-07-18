@@ -194,7 +194,7 @@ const RequireAuth = () => {
   }, [permissionsError, permissionsQueryError, dispatch]);
 
   // ------------------------------------------------------------------
-  // Step 8: Redirect PLATFORM_ADMIN users to /system-admin
+  // Step 8: Redirect users by role
   // Role is read from realmRoles (set at login from validate-token);
   // moduleData.userType is a fallback for sessions restored another way.
   // ------------------------------------------------------------------
@@ -204,11 +204,21 @@ const RequireAuth = () => {
     const isAccessingAdminZone = location.pathname.startsWith('/system-admin');
     const isPlatformAdmin =
       realmRoles.includes('PLATFORM_ADMIN') || moduleData.userType === 'PLATFORM_ADMIN';
+    const isCustomerOrVendor =
+      realmRoles.includes('CUSTOMER_USER') ||
+      realmRoles.includes('VENDOR_USER') ||
+      moduleData.userType === 'ADMIN' ||
+      moduleData.userType === 'USER';
 
     if (isPlatformAdmin) {
       // Platform admins are restricted to the /system-admin ecosystem
       if (!isAccessingAdminZone) {
         navigate('/system-admin', { replace: true });
+      }
+    } else if (isCustomerOrVendor) {
+      // Customer and vendor users are restricted from the platform admin zone
+      if (isAccessingAdminZone) {
+        navigate('/dashboard', { replace: true });
       }
     }
   }, [moduleData, realmRoles, location.pathname, navigate]);
