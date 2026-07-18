@@ -28,15 +28,6 @@ type ValidateTokenResponse = {
 // Move to a VITE_IAM_CLIENT_TOKEN env var if it ever needs to vary per environment.
 const IAM_CLIENT_BASIC = 'dmFhbGRvY19hcHA6aVFFajJrMkJiT0k4MVl2RGFtMHNBaWZoNlBaRXFuaUU=';
 
-export type ModuleResponse = {
-  userId: string;
-  tenantId: string;
-  userType: 'PLATFORM_ADMIN' | 'ADMIN' | 'USER';
-  subscribed_apps: string[];
-  exp: number;
-  iat: number;
-};
-
 export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     generateToken: builder.mutation<GenerateTokenResponse, LoginCredentials>({
@@ -70,9 +61,6 @@ export const authApi = apiSlice.injectEndpoints({
     getUserPermissions: builder.query<UserPermission[], string>({
       query: (userId) => `/userpermissions/${userId}`,
     }),
-    getModule: builder.query<ModuleResponse, void>({
-      query: () => '/module',
-    }),
   }),
 });
 
@@ -81,5 +69,4 @@ export const {
   useValidateTokenMutation,
   useRefreshMutation,
   useGetUserPermissionsQuery,
-  useGetModuleQuery,
 } = authApi;

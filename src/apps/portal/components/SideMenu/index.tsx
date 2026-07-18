@@ -3,9 +3,6 @@ import { useNavigate, useLocation } from 'react-router';
 import {
   Users,
   Store,
-  ShieldCheck,
-  KeyRound,
-  Shield,
   CreditCard,
   Building2,
   ChevronLeft,

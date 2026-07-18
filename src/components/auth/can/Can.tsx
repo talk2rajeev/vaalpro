@@ -19,8 +19,6 @@ export const Can = ({
 
   const engine = createAuthEngine({
     permissions: authState.permissions ?? [],
-    subscribedApps: authState.moduleData?.subscribed_apps ?? [],
-    userType: authState.moduleData?.userType ?? 'USER',
   });
 
   const required = Array.isArray(perform) ? perform : [perform];

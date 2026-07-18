@@ -2,9 +2,10 @@ import { useEffect, useRef } from 'react';
 import { Outlet, Navigate, useLocation, useNavigate } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '@/store/store';
-import { useRefreshMutation, useValidateTokenMutation, useGetUserPermissionsQuery, useGetModuleQuery } from '@/features/auth/authApi';
-import { setCredentials, setPermissions, setModuleData, logout } from '@/features/auth/authSlice';
+import { useRefreshMutation, useValidateTokenMutation, useGetUserPermissionsQuery } from '@/features/auth/authApi';
+import { setCredentials, setPermissions, logout } from '@/features/auth/authSlice';
 import { Loader2 } from 'lucide-react';
+import { getDefaultRouteFromRealmRoles } from '@/features/auth/roleRouting';
 
 // Checks whether an RTK Query error is an HTTP 404
 const is404 = (error: unknown): boolean =>
@@ -23,8 +24,8 @@ const is404 = (error: unknown): boolean =>
  *  2. Call `/iam/validate-token` to decode the token and extract userId,
  *     email, realmRoles.
  *  3. Dispatch `setCredentials` with the token + validated identity.
- *  4. Fetch module data via `useGetModuleQuery` and permissions via
- *     `useGetUserPermissionsQuery(userId)`, committing both to the store.
+ *  4. Fetch permissions via `useGetUserPermissionsQuery(userId)`, committing
+ *     them to the store.
  *  5. Render `<Outlet />` once everything is ready; show a loader in between;
  *     redirect to /login on any failure.
  */
@@ -32,7 +33,7 @@ const RequireAuth = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
-  const { accessToken, userId, realmRoles, exp, isAuthChecked, isPermissionsLoaded, isModuleLoaded, moduleData } = useSelector(
+  const { accessToken, userId, realmRoles, exp, isAuthChecked, isPermissionsLoaded } = useSelector(
     (state: RootState) => state.auth
   );
 
@@ -121,49 +122,7 @@ const RequireAuth = () => {
   }, [accessToken, exp, refresh, validateToken, dispatch]);
 
   // ------------------------------------------------------------------
-  // Step 4: Fetch module data once accessToken is available
-  // ------------------------------------------------------------------
-  const {
-    data: moduleDataResponse,
-    isSuccess: moduleSuccess,
-    isError: moduleError,
-    error: moduleQueryError,
-  } = useGetModuleQuery(undefined, { skip: !accessToken || isModuleLoaded });
-
-  // Step 5: Commit module data to the store
-  useEffect(() => {
-    if (moduleSuccess && moduleDataResponse) {
-      dispatch(setModuleData(moduleDataResponse));
-    }
-  }, [moduleSuccess, moduleDataResponse, dispatch]);
-
-  // If module data fails to load:
-  //  - 404 → backend not available yet; fall back using Redux store credentials
-  //  - other errors → end the session
-  useEffect(() => {
-    if (!moduleError) return;
-
-    if (is404(moduleQueryError) && accessToken) {
-      dispatch(
-        setModuleData({
-          userId: userId ?? '',
-          tenantId: '',
-          userType: (realmRoles.includes('PLATFORM_ADMIN')
-            ? 'PLATFORM_ADMIN'
-            : 'USER') as 'PLATFORM_ADMIN' | 'ADMIN' | 'USER',
-          subscribed_apps: [],
-          exp: 0,
-          iat: 0,
-        })
-      );
-      return;
-    }
-
-    dispatch(logout());
-  }, [moduleError, moduleQueryError, accessToken, userId, realmRoles, dispatch]);
-
-  // ------------------------------------------------------------------
-  // Step 6: Fetch permissions once userId is available
+  // Step 4: Fetch permissions once userId is available
   // ------------------------------------------------------------------
   const {
     data: permissionsData,
@@ -172,7 +131,7 @@ const RequireAuth = () => {
     error: permissionsQueryError,
   } = useGetUserPermissionsQuery(userId!, { skip: !userId });
 
-  // Step 7: Commit permissions to the store
+  // Step 5: Commit permissions to the store
   useEffect(() => {
     if (permissionsSuccess && permissionsData) {
       dispatch(setPermissions(permissionsData));
@@ -194,45 +153,41 @@ const RequireAuth = () => {
   }, [permissionsError, permissionsQueryError, dispatch]);
 
   // ------------------------------------------------------------------
-  // Step 8: Redirect users by role
-  // Role is read from realmRoles (set at login from validate-token);
-  // moduleData.userType is a fallback for sessions restored another way.
+  // Step 6: Redirect users by role
+  // Role is read from realmRoles (set at login from validate-token).
   // ------------------------------------------------------------------
   useEffect(() => {
-    if (!moduleData) return;
+    if (!accessToken || !realmRoles.length) return;
 
     const isAccessingAdminZone = location.pathname.startsWith('/system-admin');
-    const isPlatformAdmin =
-      realmRoles.includes('PLATFORM_ADMIN') || moduleData.userType === 'PLATFORM_ADMIN';
+    const defaultRoute = getDefaultRouteFromRealmRoles(realmRoles);
+    const isPlatformAdmin = realmRoles.includes('PLATFORM_ADMIN');
     const isCustomerOrVendor =
       realmRoles.includes('CUSTOMER_USER') ||
-      realmRoles.includes('VENDOR_USER') ||
-      moduleData.userType === 'ADMIN' ||
-      moduleData.userType === 'USER';
+      realmRoles.includes('VENDOR_USER');
 
     if (isPlatformAdmin) {
       // Platform admins are restricted to the /system-admin ecosystem
       if (!isAccessingAdminZone) {
-        navigate('/system-admin', { replace: true });
+        navigate(defaultRoute, { replace: true });
       }
     } else if (isCustomerOrVendor) {
       // Customer and vendor users are restricted from the platform admin zone
       if (isAccessingAdminZone) {
-        navigate('/dashboard', { replace: true });
+        navigate(defaultRoute, { replace: true });
       }
     }
-  }, [moduleData, realmRoles, location.pathname, navigate]);
+  }, [accessToken, realmRoles, location.pathname, navigate]);
 
   // ------------------------------------------------------------------
   // UI States
   // ------------------------------------------------------------------
 
-  // Still waiting for the refresh call, module data, or permissions to load
+  // Still waiting for the refresh call or permissions to load
   const isInitialising = !accessToken && !isAuthChecked;
-  const isLoadingModule = !!accessToken && !isModuleLoaded;
   const isLoadingPermissions = !!userId && !isPermissionsLoaded;
 
-  if (isRefreshing || isInitialising || isLoadingModule || isLoadingPermissions) {
+  if (isRefreshing || isInitialising || isLoadingPermissions) {
     return <div className="flex items-center justify-center h-screen w-screen">
       <div className='bg-slate-50 rounded-xl shadow-md border border-slate-200 p-8 flex flex-col gap-4 items-center justify-center'>
         <div className="flex items-center gap-2">

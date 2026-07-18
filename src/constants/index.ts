@@ -4,9 +4,9 @@ export const MOCK_PHARMA = [
 ];
 
 export const MOCK_PLANTS = [
-  { id: 'PL-001', pharmaId: 'PH-001', name: 'Plant A - Mumbai' },
-  { id: 'PL-002', pharmaId: 'PH-001', name: 'Plant B - Pune' },
-  { id: 'PL-003', pharmaId: 'PH-002', name: 'BioPlant 1 - Bangalore' },
+  { id: 'PL-001', pharmaId: 'PH-001', name: 'Plant A - Mumbai', status: 'active', equipmentCount: 428, complianceRate: '97%' },
+  { id: 'PL-002', pharmaId: 'PH-001', name: 'Plant B - Pune', status: 'active', equipmentCount: 316, complianceRate: '94%' },
+  { id: 'PL-003', pharmaId: 'PH-002', name: 'BioPlant 1 - Bangalore', status: 'pending', equipmentCount: 212, complianceRate: '88%' },
 ];
 
 export const MOCK_BLOCKS = [

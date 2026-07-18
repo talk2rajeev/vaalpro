@@ -1,6 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import type { ModuleResponse } from './authApi';
 
 export interface UserPermission {
   conditions: Record<string, unknown>;
@@ -21,8 +20,6 @@ interface AuthState {
   isAuthChecked: boolean;
   permissions: UserPermission[];
   isPermissionsLoaded: boolean;
-  moduleData: ModuleResponse | null;
-  isModuleLoaded: boolean;
 }
 
 const initialState: AuthState = {
@@ -37,8 +34,6 @@ const initialState: AuthState = {
   isAuthChecked: false,
   permissions: [],
   isPermissionsLoaded: false,
-  moduleData: null,
-  isModuleLoaded: false,
 };
 
 const authSlice = createSlice({
@@ -68,16 +63,10 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
       state.isAuthChecked = true;
       state.isPermissionsLoaded = false;
-      state.isModuleLoaded = false;
-      state.moduleData = null;
     },
     setPermissions(state, action: PayloadAction<UserPermission[]>) {
       state.permissions = action.payload;
       state.isPermissionsLoaded = true;
-    },
-    setModuleData(state, action: PayloadAction<ModuleResponse>) {
-      state.moduleData = action.payload;
-      state.isModuleLoaded = true;
     },
     logout(state) {
       state.user = null;
@@ -91,11 +80,9 @@ const authSlice = createSlice({
       state.isAuthChecked = true;
       state.permissions = [];
       state.isPermissionsLoaded = false;
-      state.moduleData = null;
-      state.isModuleLoaded = false;
     },
   },
 });
 
-export const { setCredentials, setPermissions, setModuleData, logout } = authSlice.actions;
+export const { setCredentials, setPermissions, logout } = authSlice.actions;
 export default authSlice.reducer;
