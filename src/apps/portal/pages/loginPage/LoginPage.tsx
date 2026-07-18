@@ -6,6 +6,7 @@ import { setCredentials } from '@/features/auth/authSlice';
 import { useGenerateTokenMutation, useValidateTokenMutation } from '@/features/auth/authApi';
 import { useNavigate } from 'react-router';
 import { Button } from '@/components/core-components/button';
+import { getDefaultRouteFromRealmRoles } from '@/features/auth/roleRouting';
 
 type LoginError = {
   status?: number;
@@ -58,10 +59,8 @@ export const LoginPage: React.FC = () => {
         })
       );
 
-      // Step 4: Route by role. PLATFORM_ADMIN -> system-admin ecosystem;
-      // CUSTOMER_USER / VENDOR_USER -> dashboard (under ModuleGuard).
-      const isAdmin = validated.realmRoles.includes('PLATFORM_ADMIN');
-      navigate(isAdmin ? '/system-admin' : '/dashboard', { replace: true });
+      // Step 4: Route by role from validate-token realmRoles.
+      navigate(getDefaultRouteFromRealmRoles(validated.realmRoles), { replace: true });
     } catch (err: unknown) {
       if (!isLoginError(err) || !err.status) {
         setErrorMsg('No Server Response');

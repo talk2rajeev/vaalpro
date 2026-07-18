@@ -11,8 +11,6 @@ export const RouteGuard = () => {
 
   const engine = createAuthEngine({
     permissions: authState.permissions ?? [],
-    subscribedApps: authState.moduleData?.subscribed_apps ?? [],
-    userType: authState.moduleData?.userType ?? 'USER',
   });
 
   const currentMatch = matches[matches.length - 1];

@@ -1,16 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import {
   ArrowRight,
-  Bell,
   ClipboardCheck,
   FileCheck2,
   Gauge,
-  LogOut,
 } from 'lucide-react';
-import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router';
-import { logout } from '@/features/auth/authSlice';
 import DashboardHeader from '@/apps/shared/components/DashboardHeader';
 
 
@@ -62,9 +58,7 @@ const apps: AppConfig[] = [
 ];
 
 const VaalproDashboardPage = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('Dashboard');
-  const dispatch = useDispatch();
+  const searchQuery = '';
   const navigate = useNavigate();
 
   const filteredApps = useMemo(() => {
@@ -80,11 +74,6 @@ const VaalproDashboardPage = () => {
       ),
     );
   }, [searchQuery]);
-
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate('/login', { replace: true });
-  };
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-800 antialiased">

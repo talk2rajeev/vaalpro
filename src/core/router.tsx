@@ -1,7 +1,6 @@
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router';
 import type { RouteObject } from 'react-router';
 import LoginPage from '@/apps/portal/pages/loginPage/LoginPage';
-import VaalproDashboardPage from '@/apps/portal/pages/vaalproDashboardPage/VaalproDashboardPage';
 import CaaldocDashboardPage from '@/apps/caaldoc/pages/CaaldocDashboardPage';
 import PlantDetailsPage from '@/apps/caaldoc/pages/PlantDetailsPage';
 import AuditLogPage from '@/apps/caaldoc/pages/AuditLogPage';
@@ -17,10 +16,8 @@ import PermissionGroupPage from '@/apps/portal/pages/permissionGroupPage/Permiss
 import SubscriptionManagementPage from '@/apps/portal/pages/subscriptionManagementPage/SubscriptionManagementPage';
 import VendorCustomerManagementPage from '@/apps/portal/pages/VendorCustomerManagementPage/VendorCustomerManagementPage';
 import RequireAuth from '@/components/auth/requireAuth/RequireAuth';
-import ModuleGuard from '@/components/auth/moduleGuard/ModuleGuard';
 import RouteGuard from '@/components/auth/routeGuard/RouteGuard';
 import { PERMISSIONS } from '@/core/authorization/permissions';
-import { MODULES } from '@/core/authorization/modules';
 
 const routes = [
   {
@@ -29,7 +26,7 @@ const routes = [
   },
   {
     path: '/',
-    element: <Navigate to="/dashboard" replace />,
+    element: <Navigate to="/caaldoc/dashboard" replace />,
   },
   {
     element: <RequireAuth />,
@@ -40,7 +37,7 @@ const routes = [
         children: [
           {
             index: true,
-            element: <Navigate to="/system-admin/vendor-employee" replace />,
+            element: <Navigate to="/system-admin/vendors" replace />,
           },
           {
             path: 'vendor-employee',
@@ -73,67 +70,50 @@ const routes = [
         ],
       },
       {
-        element: <ModuleGuard />,
+        element: <CaaldocLayout />,
         children: [
           {
-            path: '/dashboard',
-            element: <VaalproDashboardPage />,
-            handle: {
-              requiredModule: MODULES.PORTAL,
-            },
-          },
-          {
-            element: <CaaldocLayout />,
+            element: <RouteGuard />,
             children: [
               {
-                element: <RouteGuard />,
-                children: [
-                  {
-                    path: '/caaldoc/dashboard',
-                    element: <CaaldocDashboardPage />,
-                    handle: {
-                      requiredModule: MODULES.CAALDOC,
-                      routeAccessPermissions: PERMISSIONS.CAALDOC.DASHBOARD_VIEW,
-                    },
-                  },
-                  {
-                    path: '/caaldoc/plants/:id',
-                    element: <PlantDetailsPage />,
-                    handle: {
-                      requiredModule: MODULES.CAALDOC,
-                      routeAccessPermissions: PERMISSIONS.CAALDOC.PLANT_VIEW,
-                    },
-                  },
-                  {
-                    path: '/caaldoc/audit',
-                    element: <AuditLogPage />,
-                    handle: {
-                      requiredModule: MODULES.CAALDOC,
-                      routeAccessPermissions: PERMISSIONS.CAALDOC.LOG_VIEW,
-                    },
-                  },
-                  {
-                    path: '/caaldoc/settings',
-                    element: <SettingsPage />,
-                    handle: {
-                      requiredModule: MODULES.CAALDOC,
-                      routeAccessPermissions: PERMISSIONS.CAALDOC.SETTING_VIEW,
-                    },
-                  },
-                ],
+                path: '/caaldoc/dashboard',
+                element: <CaaldocDashboardPage />,
+                handle: {
+                  routeAccessPermissions: PERMISSIONS.CAALDOC.DASHBOARD_VIEW,
+                },
+              },
+              {
+                path: '/caaldoc/plants/:id',
+                element: <PlantDetailsPage />,
+                handle: {
+                  routeAccessPermissions: PERMISSIONS.CAALDOC.PLANT_VIEW,
+                },
+              },
+              {
+                path: '/caaldoc/audit',
+                element: <AuditLogPage />,
+                handle: {
+                  routeAccessPermissions: PERMISSIONS.CAALDOC.LOG_VIEW,
+                },
+              },
+              {
+                path: '/caaldoc/settings',
+                element: <SettingsPage />,
+                handle: {
+                  routeAccessPermissions: PERMISSIONS.CAALDOC.SETTING_VIEW,
+                },
               },
             ],
-          },
-          {
-            path: '/vaaldoc',
-            element: <VaaldocComingSoonPage />,
-            handle: { requiredModule: MODULES.VAALDOC },
           },
         ],
       },
       {
+        path: '/vaaldoc',
+        element: <VaaldocComingSoonPage />,
+      },
+      {
         path: '*',
-        element: <Navigate to="/dashboard" replace />,
+        element: <Navigate to="/caaldoc/dashboard" replace />,
       },
     ],
   },

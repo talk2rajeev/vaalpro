@@ -5,16 +5,21 @@ import { useDispatch, useSelector } from 'react-redux';
 import { DropdownMenu as DropdownMenuPrimitive } from 'radix-ui';
 import type { RootState } from '@/store/store';
 import { logout } from '@/features/auth/authSlice';
+import { getUserTypeFromRealmRoles } from '@/features/auth/roleRouting';
 
 const DashboardHeader: React.FC<{ showLogo?: boolean }> = ({ showLogo }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { user, moduleData } = useSelector((state: RootState) => state.auth);
+  const { user, realmRoles } = useSelector((state: RootState) => state.auth);
   const displayName = user ?? 'Rajeev Kumar';
-  const roleLabel = moduleData?.userType?.replace('_', ' ') ?? 'System Admin';
+  const roleLabel = realmRoles.length
+    ? getUserTypeFromRealmRoles(realmRoles).replace('_', ' ')
+    : 'System Admin';
 
   const navigateToVaalpro = () => {
-    navigate('/dashboard');
+    const isPlatformAdmin = realmRoles.includes('PLATFORM_ADMIN');
+
+    navigate(isPlatformAdmin ? '/system-admin' : '/caaldoc/dashboard');
   };
 
   const handleLogout = () => {
