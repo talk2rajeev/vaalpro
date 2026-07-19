@@ -10,6 +10,7 @@ import { CaaldocLayout } from '@/apps/caaldoc/pages/CaaldocLayout';
 import { VaalProLayout } from '@/apps/portal/components/VaalProLayout';
 import VendorEmployeeManagementPage from '@/apps/portal/pages/VendorEmployeeManagementPage/VendorEmployeeManagementPage';
 import VendorManagementPage from '@/apps/portal/pages/vendorManagementPage/VendorManagementPage';
+import VendorDetailPage from '@/apps/portal/pages/vendorDetailPage/VendorDetailPage';
 import RoleManagementPage from '@/apps/portal/pages/roleManagementPage/RoleManagementPage';
 import PermissionManagementPage from '@/apps/portal/pages/permissionManagementPage/PermissionManagementPage';
 import PermissionGroupPage from '@/apps/portal/pages/permissionGroupPage/PermissionGroupPage';
@@ -40,12 +41,20 @@ const routes = [
             element: <Navigate to="/system-admin/vendors" replace />,
           },
           {
-            path: 'vendor-employee',
+            path: 'vendors',
+            element: <VendorManagementPage />,
+          },
+          {
+            path: 'vendors/:vendorId/detail',
+            element: <VendorDetailPage />,
+          },
+          {
+            path: 'vendors/:vendorId/employee',
             element: <VendorEmployeeManagementPage />,
           },
           {
-            path: 'vendors',
-            element: <VendorManagementPage />,
+            path: 'vendors/:vendorId/customers',
+            element: <VendorCustomerManagementPage />,
           },
           {
             path: 'roles',
@@ -62,10 +71,6 @@ const routes = [
           {
             path: 'subscriptions',
             element: <SubscriptionManagementPage />,
-          },
-          {
-            path: 'manage-vendor-customer',
-            element: <VendorCustomerManagementPage />,
           },
         ],
       },

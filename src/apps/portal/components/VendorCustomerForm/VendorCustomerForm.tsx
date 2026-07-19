@@ -46,6 +46,7 @@ interface VendorCustomerFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   customer?: Customer | null;
+  vendorSysId?: string;
 }
 
 const emptyCustomer: CustomerFormValues = {
@@ -56,7 +57,7 @@ const emptyCustomer: CustomerFormValues = {
   createdBy: '', remarks: '',
 };
 
-const getDefaultValues = (customer?: Customer | null): CustomerFormValues => customer ? {
+const getDefaultValues = (customer?: Customer | null, vendorSysId = ''): CustomerFormValues => customer ? {
   vendorSysId: customer.vendorSysId, customerLegalName: customer.customerLegalName,
   customerType: customer.customerType ?? '', customerStatus: customer.customerStatus ?? '',
   corporateNameCodeShort: customer.corporateNameCodeShort ?? '', website: customer.website ?? '',
@@ -68,7 +69,7 @@ const getDefaultValues = (customer?: Customer | null): CustomerFormValues => cus
   cin: customer.cin ?? '', msmeStatus: customer.msmeStatus ?? '',
   ndaRequired: customer.ndaRequired ?? false, qualityAgreementRequired: customer.qualityAgreementRequired ?? false,
   createdBy: customer.createdBy ?? '', remarks: customer.remarks ?? '',
-} : emptyCustomer;
+} : { ...emptyCustomer, vendorSysId };
 
 const getErrorMessage = (error: unknown) => {
   if (typeof error === 'object' && error !== null && 'data' in error) {
@@ -78,22 +79,22 @@ const getErrorMessage = (error: unknown) => {
   return 'Unable to save the customer. Please try again.';
 };
 
-const VendorCustomerForm = ({ mode, open, onOpenChange, customer }: VendorCustomerFormProps) => {
+const VendorCustomerForm = ({ mode, open, onOpenChange, customer, vendorSysId }: VendorCustomerFormProps) => {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [createCustomer, { isLoading: isCreating }] = useCreateCustomerMutation();
   const [updateCustomer, { isLoading: isUpdating }] = useUpdateCustomerMutation();
   const { register, handleSubmit, formState: { errors, isValid }, reset } = useForm<CustomerFormValues>({
     resolver: zodResolver(customerSchema),
-    defaultValues: getDefaultValues(customer),
+    defaultValues: getDefaultValues(customer, vendorSysId),
     mode: 'onChange',
   });
   const isSaving = isCreating || isUpdating;
 
   useEffect(() => {
     if (open) {
-      reset(getDefaultValues(customer));
+      reset(getDefaultValues(customer, vendorSysId));
     }
-  }, [open, customer, reset]);
+  }, [open, customer, vendorSysId, reset]);
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) setSaveError(null);
