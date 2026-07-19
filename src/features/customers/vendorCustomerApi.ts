@@ -8,7 +8,7 @@ import type {
   CustomersByVendorParams,
 } from '@/features/customers/customerTypes';
 
-export const customerApi = apiSlice.injectEndpoints({
+export const vendorCustomerApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getCustomers: builder.query<CustomerPage, CustomerListParams>({
       query: ({ page, size, sortBy = 'customerSysId', sortDir = 'asc' }) => ({
@@ -18,14 +18,14 @@ export const customerApi = apiSlice.injectEndpoints({
       providesTags: (result) =>
         result
           ? [
-              ...result.content.map(({ customerSysId }) => ({ type: 'Customer' as const, id: customerSysId })),
-              { type: 'Customer', id: 'LIST' },
+              ...result.content.map(({ customerSysId }) => ({ type: 'VendorCustomer' as const, id: customerSysId })),
+              { type: 'VendorCustomer', id: 'LIST' },
             ]
-          : [{ type: 'Customer', id: 'LIST' }],
+          : [{ type: 'VendorCustomer', id: 'LIST' }],
     }),
     getCustomerById: builder.query<Customer, string>({
       query: (customerSysId) => `/customers/${customerSysId}`,
-      providesTags: (_result, _error, customerSysId) => [{ type: 'Customer', id: customerSysId }],
+      providesTags: (_result, _error, customerSysId) => [{ type: 'VendorCustomer', id: customerSysId }],
     }),
     getCustomersByVendor: builder.query<CustomerPage, CustomersByVendorParams>({
       query: ({ vendorSysId, page, size, sortBy = 'customerSysId', sortDir = 'asc' }) => ({
@@ -35,10 +35,10 @@ export const customerApi = apiSlice.injectEndpoints({
       providesTags: (result) =>
         result
           ? [
-              ...result.content.map(({ customerSysId }) => ({ type: 'Customer' as const, id: customerSysId })),
-              { type: 'Customer', id: 'VENDOR_LIST' },
+              ...result.content.map(({ customerSysId }) => ({ type: 'VendorCustomer' as const, id: customerSysId })),
+              { type: 'VendorCustomer', id: 'VENDOR_LIST' },
             ]
-          : [{ type: 'Customer', id: 'VENDOR_LIST' }],
+          : [{ type: 'VendorCustomer', id: 'VENDOR_LIST' }],
     }),
     createCustomer: builder.mutation<Customer, CreateCustomerPayload>({
       query: (body) => ({
@@ -46,7 +46,7 @@ export const customerApi = apiSlice.injectEndpoints({
         method: 'POST',
         body,
       }),
-      invalidatesTags: [{ type: 'Customer', id: 'LIST' }],
+      invalidatesTags: [{ type: 'VendorCustomer', id: 'LIST' }],
     }),
     updateCustomer: builder.mutation<Customer, { customerSysId: string; body: CreateCustomerPayload }>({
       query: ({ customerSysId, body }) => ({
@@ -55,8 +55,8 @@ export const customerApi = apiSlice.injectEndpoints({
         body,
       }),
       invalidatesTags: (_result, _error, { customerSysId }) => [
-        { type: 'Customer', id: customerSysId },
-        { type: 'Customer', id: 'LIST' },
+        { type: 'VendorCustomer', id: customerSysId },
+        { type: 'VendorCustomer', id: 'LIST' },
       ],
     }),
     deleteCustomer: builder.mutation<void, string>({
@@ -64,7 +64,7 @@ export const customerApi = apiSlice.injectEndpoints({
         url: `/customers/${customerSysId}`,
         method: 'DELETE',
       }),
-      invalidatesTags: [{ type: 'Customer', id: 'LIST' }],
+      invalidatesTags: [{ type: 'VendorCustomer', id: 'LIST' }],
     }),
     searchCustomers: builder.query<CustomerPage, SearchCustomersParams>({
       query: ({ customerLegalName, page, size }) => ({
@@ -74,10 +74,10 @@ export const customerApi = apiSlice.injectEndpoints({
       providesTags: (result) =>
         result
           ? [
-              ...result.content.map(({ customerSysId }) => ({ type: 'Customer' as const, id: customerSysId })),
-              { type: 'Customer', id: 'SEARCH' },
+              ...result.content.map(({ customerSysId }) => ({ type: 'VendorCustomer' as const, id: customerSysId })),
+              { type: 'VendorCustomer', id: 'SEARCH' },
             ]
-          : [{ type: 'Customer', id: 'SEARCH' }],
+          : [{ type: 'VendorCustomer', id: 'SEARCH' }],
     }),
   }),
 });
@@ -90,4 +90,4 @@ export const {
   useUpdateCustomerMutation,
   useDeleteCustomerMutation,
   useSearchCustomersQuery,
-} = customerApi;
+} = vendorCustomerApi;
