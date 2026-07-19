@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/core-components/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/core-components/tooltip';
 import VendorCustomerForm from '@/apps/portal/components/VendorCustomerForm/VendorCustomerForm';
-import { useDeleteCustomerMutation, useGetCustomersQuery } from '@/features/customers/customerApi';
+import { useDeleteCustomerMutation, useGetCustomersQuery } from '@/features/customers/vendorCustomerApi';
 import type { Customer } from '@/features/customers/customerTypes';
 
 const getErrorMessage = (error: unknown) => {

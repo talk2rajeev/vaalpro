@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/core-components/dialog';
-import { useCreateCustomerMutation, useUpdateCustomerMutation } from '@/features/customers/customerApi';
+import { useCreateCustomerMutation, useUpdateCustomerMutation } from '@/features/customers/vendorCustomerApi';
 import type { Customer } from '@/features/customers/customerTypes';
 
 const customerSchema = z.object({
