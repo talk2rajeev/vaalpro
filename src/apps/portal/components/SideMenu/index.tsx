@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import {
-  Users,
   Store,
   CreditCard,
-  Building2,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
@@ -27,11 +25,6 @@ const menuItems: MenuItem[] = [
     path: '/system-admin/vendors',
     icon: <Store size={20} />,
   },
-  {
-    label: 'Vendor Employees',
-    path: '/system-admin/vendor-employee',
-    icon: <Users size={20} />,
-  },
   // {
   //   label: 'Roles',
   //   path: '/system-admin/roles',
@@ -47,11 +40,6 @@ const menuItems: MenuItem[] = [
   //   path: '/system-admin/permission-groups',
   //   icon: <Shield size={20} />,
   // },
-  {
-    label: 'Vendor Customer',
-    path: '/system-admin/manage-vendor-customer',
-    icon: <Building2 size={20} />,
-  },
   {
     label: 'Subscriptions',
     path: '/system-admin/subscriptions',

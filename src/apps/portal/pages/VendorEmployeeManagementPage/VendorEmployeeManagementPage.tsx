@@ -1,10 +1,19 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link, useParams } from 'react-router';
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { AlertCircle, Loader2, Pencil, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/core-components/button';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/core-components/breadcrumb';
 import {
   Dialog,
   DialogContent,
@@ -15,7 +24,7 @@ import {
 } from '@/components/core-components/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/core-components/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/core-components/tooltip';
-import { useGetVendorsQuery } from '@/features/vendors/vendorApi';
+import { useGetVendorByIdQuery, useGetVendorsQuery } from '@/features/vendors/vendorApi';
 import type { Vendor } from '@/features/vendors/vendorTypes';
 import {
   useCreateVendorEmployeeMutation,
@@ -44,8 +53,10 @@ const getErrorMessage = (error: unknown, fallback: string) => {
 };
 
 const VendorEmployeeManagementPage = () => {
+  const { vendorId } = useParams<{ vendorId: string }>();
+  const hasVendorContext = Boolean(vendorId);
   const [page, setPage] = useState(0);
-  const [selectedVendorSysId, setSelectedVendorSysId] = useState('');
+  const [selectedVendorSysId, setSelectedVendorSysId] = useState(vendorId ?? '');
   const [editingEmployee, setEditingEmployee] = useState<VendorEmployee | null>(null);
   const [deletingEmployee, setDeletingEmployee] = useState<VendorEmployee | null>(null);
   const [isAdding, setIsAdding] = useState(false);
@@ -56,18 +67,32 @@ const VendorEmployeeManagementPage = () => {
     isLoading: isLoadingVendors,
     isError: isVendorError,
     error: vendorError,
-  } = useGetVendorsQuery({ page: 0, size: 100, sortBy: 'vendorName', sortDir: 'asc' });
+  } = useGetVendorsQuery(
+    { page: 0, size: 100, sortBy: 'vendorName', sortDir: 'asc' },
+    { skip: hasVendorContext },
+  );
+  const {
+    data: routeVendor,
+    isLoading: isLoadingRouteVendor,
+    isError: isRouteVendorError,
+    error: routeVendorError,
+  } = useGetVendorByIdQuery(vendorId ?? '', { skip: !hasVendorContext });
 
   const selectedVendor = useMemo(
-    () => vendorsData?.content.find((vendor) => vendor.vendorSysId === selectedVendorSysId) ?? null,
-    [selectedVendorSysId, vendorsData],
+    () => routeVendor ?? vendorsData?.content.find((vendor) => vendor.vendorSysId === selectedVendorSysId) ?? null,
+    [routeVendor, selectedVendorSysId, vendorsData],
   );
 
   useEffect(() => {
+    if (vendorId) {
+      setSelectedVendorSysId(vendorId);
+      return;
+    }
+
     if (!selectedVendorSysId && vendorsData?.content.length) {
       setSelectedVendorSysId(vendorsData.content[0].vendorSysId);
     }
-  }, [selectedVendorSysId, vendorsData]);
+  }, [vendorId, selectedVendorSysId, vendorsData]);
 
   const {
     data,
@@ -194,7 +219,33 @@ const VendorEmployeeManagementPage = () => {
     <TooltipProvider>
       <main className="min-h-screen bg-slate-50 p-8 text-slate-900">
         <section className="w-full">
-          <div className="flex items-start justify-between gap-6">
+          {hasVendorContext && (
+            <Breadcrumb>
+              <BreadcrumbList className="text-xs">
+                <BreadcrumbItem>Platform Admin</BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/system-admin/vendors">Vendors</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to={`/system-admin/vendors/${vendorId}/detail`}>
+                      {selectedVendor?.vendorName ?? vendorId}
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage className="font-bold text-blue-800">Employees</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          )}
+
+          <div className={`flex items-start justify-between gap-6 ${hasVendorContext ? 'mt-4' : ''}`}>
             <div>
               <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">System Administration</p>
               <h1 className="mt-2 text-3xl font-bold">Vendor Employee Management</h1>
@@ -213,32 +264,38 @@ const VendorEmployeeManagementPage = () => {
               Vendor
             </label>
             <div className="mt-2 flex flex-col gap-3 md:flex-row md:items-center">
-              <select
-                id="vendor-employee-vendor"
-                value={selectedVendorSysId}
-                onChange={(event) => handleVendorChange(event.target.value)}
-                disabled={isLoadingVendors || isVendorError || !vendorsData?.content.length}
-                className="min-h-9 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-medium text-slate-900 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 md:max-w-md"
-              >
-                <option value="">Select vendor</option>
-                {vendorsData?.content.map((vendor) => (
-                  <option key={vendor.vendorSysId} value={vendor.vendorSysId}>
-                    {vendor.vendorName}
-                  </option>
-                ))}
-              </select>
-              {selectedVendor && (
+              {hasVendorContext ? (
                 <span className="text-sm text-slate-500">
-                  Managing employees for <span className="font-semibold text-slate-700">{selectedVendor.vendorName}</span>
+                  Managing employees for <span className="font-semibold text-slate-700">{selectedVendor?.vendorName ?? vendorId}</span>
                 </span>
+              ) : (
+                <select
+                  id="vendor-employee-vendor"
+                  value={selectedVendorSysId}
+                  onChange={(event) => handleVendorChange(event.target.value)}
+                  disabled={isLoadingVendors || isVendorError || !vendorsData?.content.length}
+                  className="min-h-9 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-medium text-slate-900 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 md:max-w-md"
+                >
+                  <option value="">Select vendor</option>
+                  {vendorsData?.content.map((vendor) => (
+                    <option key={vendor.vendorSysId} value={vendor.vendorSysId}>
+                      {vendor.vendorName}
+                    </option>
+                  ))}
+                </select>
               )}
             </div>
           </div>
 
-          {isLoadingVendors && <LoadingState label="Loading vendors..." />}
-          {isVendorError && <ErrorState title="Failed to load vendors" message={getErrorMessage(vendorError, 'Failed to load vendors.')} />}
+          {(isLoadingVendors || isLoadingRouteVendor) && <LoadingState label="Loading vendors..." />}
+          {(isVendorError || isRouteVendorError) && (
+            <ErrorState
+              title="Failed to load vendors"
+              message={getErrorMessage(vendorError ?? routeVendorError, 'Failed to load vendors.')}
+            />
+          )}
 
-          {!isLoadingVendors && !isVendorError && !selectedVendorSysId && (
+          {!isLoadingVendors && !isLoadingRouteVendor && !isVendorError && !isRouteVendorError && !selectedVendorSysId && (
             <div className="mt-8 rounded-xl border border-slate-200 bg-white p-12 text-center text-slate-500 shadow-sm">
               Select a vendor to manage employees.
             </div>
