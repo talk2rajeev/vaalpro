@@ -75,7 +75,7 @@ const SideMenu: React.FC = () => {
         {/* Navigation Items */}
         <nav className="flex-1 p-4 space-y-2">
           {menuItems.map((item) => {
-            const isActive = location.pathname === item.path;
+            const isActive = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`);
 
             const buttonEl = (
               <button

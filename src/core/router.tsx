@@ -42,19 +42,24 @@ const routes = [
           },
           {
             path: 'vendors',
-            element: <VendorManagementPage />,
-          },
-          {
-            path: 'vendors/:vendorId/detail',
-            element: <VendorDetailPage />,
-          },
-          {
-            path: 'vendors/:vendorId/employee',
-            element: <VendorEmployeeManagementPage />,
-          },
-          {
-            path: 'vendors/:vendorId/customers',
-            element: <VendorCustomerManagementPage />,
+            children: [
+              {
+                index: true,
+                element: <VendorManagementPage />,
+              },
+              {
+                path: ':vendorId/detail',
+                element: <VendorDetailPage />,
+              },
+              {
+                path: ':vendorId/employee',
+                element: <VendorEmployeeManagementPage />,
+              },
+              {
+                path: ':vendorId/customers',
+                element: <VendorCustomerManagementPage />,
+              },
+            ],
           },
           {
             path: 'roles',
