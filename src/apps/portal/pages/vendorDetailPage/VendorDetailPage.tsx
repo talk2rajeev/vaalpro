@@ -1,21 +1,16 @@
 import { useState } from 'react';
-import { Building2, Info, Map, Pencil, Users } from 'lucide-react';
+import { Building2, Info, Pencil, Users } from 'lucide-react';
 import { Button } from '@/components/core-components/button';
 import AdminBreadcrumb from '@/apps/portal/components/AdminBreadcrumb/AdminBreadcrumb';
 import AdminPageHeader from '@/apps/portal/components/AdminPageHeader/AdminPageHeader';
 import InfoCard from '@/apps/portal/components/InfoCard/InfoCard';
 import StatusBadge from '@/apps/portal/components/StatusBadge/StatusBadge';
+import BranchesSection from '@/apps/portal/components/VendorDetail/BranchesSection';
 import DetailField from '@/apps/portal/components/VendorDetail/DetailField';
 import ManagementCard from '@/apps/portal/components/VendorDetail/ManagementCard';
 import VendorForm from '@/apps/portal/components/VendorForm/VendorForm';
 import { ROUTES } from '@/core/routes/paths';
 import { useVendorContext } from '@/features/vendors/useVendorContext';
-
-const complianceActivity = [
-  { documentName: 'Quality Assurance Cert 2023', expiryDate: 'Dec 12, 2024', status: 'VALID' },
-  { documentName: 'Safety Regulation Protocol', expiryDate: 'Jan 15, 2025', status: 'VALID' },
-  { documentName: 'Logistics License Renewal', expiryDate: 'Oct 01, 2023', status: 'EXPIRED' },
-];
 
 const VendorDetailPage = () => {
   const { vendor, isLoading, isError } = useVendorContext();
@@ -54,11 +49,7 @@ const VendorDetailPage = () => {
       <AdminPageHeader
         className="mt-5"
         badge={<StatusBadge tone="active" className="bg-blue-100 uppercase tracking-wide text-blue-800">Active Vendor</StatusBadge>}
-        title={(
-          <>
-            {vendor.vendorName} <span className="font-normal text-slate-300">(Vendor Detail)</span>
-          </>
-        )}
+        title={vendor.vendorName}
         action={(
           <Button size="lg" className="px-4" onClick={() => setIsEditingVendor(true)}>
             <Pencil data-icon="inline-start" className="size-4" />
@@ -101,55 +92,7 @@ const VendorDetailPage = () => {
         />
       </section>
 
-      <section className="mt-6 grid gap-6 xl:grid-cols-[2fr_1fr]">
-        <InfoCard
-          title="Recent Compliance Activity"
-          action={(
-            <Button type="button" variant="link" className="h-auto p-0 font-semibold text-blue-800 hover:text-blue-600">
-              View All
-            </Button>
-          )}
-        >
-          <div className="overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-100 text-left text-xs font-bold text-slate-500">
-                <tr>
-                  <th className="px-5 py-4">Document Name</th>
-                  <th className="px-5 py-4">Expiry Date</th>
-                  <th className="px-5 py-4">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {complianceActivity.map((activity) => (
-                  <tr key={activity.documentName} className="border-b border-slate-100 last:border-b-0">
-                    <td className="px-5 py-4 font-medium">{activity.documentName}</td>
-                    <td className="px-5 py-4 text-slate-600">{activity.expiryDate}</td>
-                    <td className="px-5 py-4">
-                      <StatusBadge tone={activity.status === 'VALID' ? 'valid' : 'expired'} className="rounded-full">
-                        {activity.status}
-                      </StatusBadge>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </InfoCard>
-
-        <InfoCard title="Headquarters" icon={<Map className="size-5 text-blue-800" />}>
-          <div className="relative h-56 overflow-hidden rounded-lg border border-slate-200 bg-blue-50">
-            <div className="absolute inset-0 bg-[linear-gradient(30deg,rgba(30,64,175,0.18)_12%,transparent_12%,transparent_50%,rgba(30,64,175,0.18)_50%,rgba(30,64,175,0.18)_62%,transparent_62%),linear-gradient(120deg,rgba(15,23,42,0.12)_10%,transparent_10%,transparent_46%,rgba(15,23,42,0.12)_46%,rgba(15,23,42,0.12)_54%,transparent_54%)] bg-[length:72px_72px]" />
-            <div className="absolute left-8 top-10 h-28 w-48 rotate-[-12deg] rounded-full border-2 border-blue-900/40" />
-            <div className="absolute right-6 top-4 h-40 w-16 bg-sky-200/80" />
-            <div className="absolute bottom-8 left-16 rounded-lg bg-white/90 p-4 shadow-lg backdrop-blur">
-              <p className="font-bold text-slate-800">{vendor.addressLine1 || 'Headquarters'}</p>
-              <p className="mt-1 text-sm text-slate-500">
-                {[vendor.city, vendor.postalCode].filter(Boolean).join(', ')}
-              </p>
-            </div>
-          </div>
-        </InfoCard>
-      </section>
+      <BranchesSection vendorSysId={vendor.vendorSysId} />
       <VendorForm
         mode="edit"
         open={isEditingVendor}
