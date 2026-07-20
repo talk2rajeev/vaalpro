@@ -107,7 +107,7 @@ const VendorCustomerManagementPage = () => {
           <AdminPageHeader
             className={hasVendorContext ? 'mt-4' : ''}
             eyebrow={hasVendorContext ? 'Vendor Customers' : ""}
-            title={vendor?.vendorName ? <strong>{vendor.vendorName} </strong> : 'Manage Vendor Customer'}
+            title={<span>{vendor?.vendorName ? <strong>{vendor.vendorName} </strong> : 'Manage Vendor Customer'}</span>}
             description={<span>Onboard, manage, and configure details of {vendor?.vendorName ? <strong>{vendor.vendorName} customers</strong> : 'vendor customers and corporate entities'}.</span>}
             action={(
               <Button size="lg" className="shrink-0 px-4" onClick={() => setIsAdding(true)}>

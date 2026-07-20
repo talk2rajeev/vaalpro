@@ -4,7 +4,6 @@ import { Button } from '@/components/core-components/button';
 import { TooltipProvider } from '@/components/core-components/tooltip';
 import AdminBreadcrumb from '@/apps/portal/components/AdminBreadcrumb/AdminBreadcrumb';
 import AdminPageHeader from '@/apps/portal/components/AdminPageHeader/AdminPageHeader';
-import InfoCard from '@/apps/portal/components/InfoCard/InfoCard';
 import DeleteVendorEmployeeDialog from '@/apps/portal/components/VendorEmployeeManagement/DeleteVendorEmployeeDialog';
 import { ErrorState, LoadingState } from '@/apps/portal/components/PageStates/PageStates';
 import VendorEmployeeForm from '@/apps/portal/components/VendorEmployeeManagement/VendorEmployeeForm';
@@ -82,15 +81,6 @@ const VendorEmployeeManagementPage = () => {
     { skip: !selectedVendorSysId },
   );
   const [deleteVendorEmployee, { isLoading: isDeleting }] = useDeleteVendorEmployeeMutation();
-
-  const handleVendorChange = (vendorSysId: string) => {
-    setSelectedVendorSysId(vendorSysId);
-    setPage(0);
-    setEditingEmployee(null);
-    setDeletingEmployee(null);
-    setIsAdding(false);
-    setDeleteError(null);
-  };
 
   const handleDeleteClick = useCallback((employee: VendorEmployee) => {
     setDeleteError(null);
