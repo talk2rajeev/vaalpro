@@ -14,6 +14,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from '@/components/core-components/tooltip';
+import { ROUTES } from '@/core/routes/paths';
 
 interface MenuItem {
   label: string;
@@ -24,22 +25,22 @@ interface MenuItem {
 const menuItems: MenuItem[] = [
   {
     label: 'Overview',
-    path: '/caaldoc/dashboard',
+    path: ROUTES.caaldoc.dashboard,
     icon: <LayoutDashboard size={20} />,
   },
   {
     label: 'Workflows',
-    path: '/caaldoc/workflows',
+    path: ROUTES.caaldoc.workflows,
     icon: <ClipboardList size={20} />,
   },
   {
     label: 'Hierarchy',
-    path: '/caaldoc/hierarchy',
+    path: ROUTES.caaldoc.hierarchy,
     icon: <Building2 size={20} />,
   },
   {
     label: 'Settings',
-    path: '/caaldoc/settings',
+    path: ROUTES.caaldoc.settings,
     icon: <Settings size={20} />,
   },
 ];

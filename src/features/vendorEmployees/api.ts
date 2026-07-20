@@ -6,7 +6,7 @@ import type {
   VendorEmployeeByIdParams,
   VendorEmployeeListParams,
   VendorEmployeePage,
-} from '@/features/vendorEmployees/vendorEmployeeTypes';
+} from '@/features/vendorEmployees/types';
 
 export const vendorEmployeeApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({

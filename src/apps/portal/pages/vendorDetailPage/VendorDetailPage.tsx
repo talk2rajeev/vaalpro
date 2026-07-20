@@ -1,5 +1,6 @@
-import { Link, useLocation, useParams } from 'react-router';
-import { ArrowRight, Building2, Info, Map, Pencil, Users } from 'lucide-react';
+import { useState } from 'react';
+import { Link } from 'react-router';
+import { Building2, Info, Map, Pencil, Users } from 'lucide-react';
 import { Button } from '@/components/core-components/button';
 import {
   Breadcrumb,
@@ -8,9 +9,12 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from '@/components/core-components/breadcrumb';
-import { useGetVendorByIdQuery } from '@/features/vendors/vendorApi';
-import type { Vendor } from '@/features/vendors/vendorTypes';
+} from '@/components/core-components/breadcrumb/breadcrumb';
+import DetailField from '@/apps/portal/components/VendorDetail/DetailField';
+import ManagementCard from '@/apps/portal/components/VendorDetail/ManagementCard';
+import VendorForm from '@/apps/portal/components/VendorForm/VendorForm';
+import { ROUTES } from '@/core/routes/paths';
+import { useVendorContext } from '@/features/vendors/useVendorContext';
 
 const complianceActivity = [
   { documentName: 'Quality Assurance Cert 2023', expiryDate: 'Dec 12, 2024', status: 'VALID' },
@@ -19,11 +23,8 @@ const complianceActivity = [
 ];
 
 const VendorDetailPage = () => {
-  const { vendorId } = useParams<{ vendorId: string }>();
-  const location = useLocation();
-  const stateVendor = (location.state as { vendor?: Vendor } | null)?.vendor;
-  const { data: fetchedVendor, isLoading, isError } = useGetVendorByIdQuery(vendorId ?? '', { skip: !vendorId });
-  const vendor = fetchedVendor ?? stateVendor;
+  const { vendor, isLoading, isError } = useVendorContext();
+  const [isEditingVendor, setIsEditingVendor] = useState(false);
 
   if (isLoading && !vendor) {
     return (
@@ -53,7 +54,7 @@ const VendorDetailPage = () => {
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link to="/system-admin/vendors">Vendors</Link>
+              <Link to={ROUTES.systemAdmin.vendors}>Vendors</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
@@ -72,7 +73,11 @@ const VendorDetailPage = () => {
             {vendor.vendorName} <span className="font-normal text-slate-300">(Vendor Detail)</span>
           </h1>
         </div>
-        <Button className="h-14 rounded-lg bg-blue-900 px-7 text-white hover:bg-blue-950">
+        <Button
+          size="lg"
+          className="px-4"
+          onClick={() => setIsEditingVendor(true)}
+        >
           <Pencil data-icon="inline-start" className="size-4" />
           Edit Profile
         </Button>
@@ -105,14 +110,14 @@ const VendorDetailPage = () => {
           title="Vendor Employees"
           description="Manage and view all registered employees for this vendor. Access roles, permissions, and history."
           linkLabel="Manage Employees"
-          to={`/system-admin/vendors/${vendor.vendorSysId}/employee`}
+          to={ROUTES.systemAdmin.vendorEmployees(vendor.vendorSysId)}
         />
         <ManagementCard
           icon={<Building2 className="size-7 text-blue-800" />}
           title="Vendor Customers"
           description="Manage and view all associated customers for this vendor. Review contracts, compliance status, and revenue."
           linkLabel="Manage Customers"
-          to={`/system-admin/vendors/${vendor.vendorSysId}/customers`}
+          to={ROUTES.systemAdmin.vendorCustomers(vendor.vendorSysId)}
         />
       </section>
 
@@ -120,9 +125,9 @@ const VendorDetailPage = () => {
         <div className="rounded-xl border border-slate-200 bg-white p-7 shadow-sm">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Recent Compliance Activity</h2>
-            <button className="text-sm font-semibold text-blue-800 transition-colors hover:text-blue-600 hover:underline">
+            <Button type="button" variant="link" className="h-auto p-0 font-semibold text-blue-800 hover:text-blue-600">
               View All
-            </button>
+            </Button>
           </div>
           <div className="mt-6 overflow-hidden">
             <table className="w-full text-sm">
@@ -140,11 +145,10 @@ const VendorDetailPage = () => {
                     <td className="px-5 py-4 text-slate-600">{activity.expiryDate}</td>
                     <td className="px-5 py-4">
                       <span
-                        className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                          activity.status === 'VALID'
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${activity.status === 'VALID'
                             ? 'bg-emerald-50 text-emerald-700'
                             : 'bg-red-50 text-red-700'
-                        }`}
+                          }`}
                       >
                         {activity.status}
                       </span>
@@ -174,46 +178,14 @@ const VendorDetailPage = () => {
           </div>
         </div>
       </section>
+      <VendorForm
+        mode="edit"
+        open={isEditingVendor}
+        vendor={vendor}
+        onOpenChange={setIsEditingVendor}
+      />
     </main>
   );
 };
-
-const DetailField = ({ label, value }: { label: string; value?: string }) => (
-  <div>
-    <p className="text-xs font-bold text-slate-500">{label}</p>
-    <p className={`mt-2 text-base font-semibold ${value ? 'text-slate-900' : 'italic text-slate-300'}`}>
-      {value || 'Not provided'}
-    </p>
-  </div>
-);
-
-const ManagementCard = ({
-  icon,
-  title,
-  description,
-  linkLabel,
-  to,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  linkLabel: string;
-  to: string;
-}) => (
-  <div className="flex items-start gap-6 rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
-    <div className="flex size-20 shrink-0 items-center justify-center rounded-xl bg-blue-100">{icon}</div>
-    <div>
-      <h2 className="text-xl font-semibold">{title}</h2>
-      <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600">{description}</p>
-      <Link
-        to={to}
-        className="group mt-6 inline-flex items-center gap-2 text-sm font-bold text-blue-800 transition-colors hover:text-blue-600 hover:underline"
-      >
-        {linkLabel}
-        <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-      </Link>
-    </div>
-  </div>
-);
 
 export default VendorDetailPage;

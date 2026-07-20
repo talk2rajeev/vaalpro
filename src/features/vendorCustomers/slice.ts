@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
-interface CustomerUiState {
+interface VendorCustomerUiState {
   // Pagination & Filtering
   page: number;
   size: number;
@@ -16,7 +16,7 @@ interface CustomerUiState {
   selectedCustomerSysId: string | null;
 }
 
-const initialState: CustomerUiState = {
+const initialState: VendorCustomerUiState = {
   page: 0,
   size: 10,
   sortBy: 'customerSysId',
@@ -29,8 +29,8 @@ const initialState: CustomerUiState = {
   selectedCustomerSysId: null,
 };
 
-const customerUiSlice = createSlice({
-  name: 'customerUi',
+const vendorCustomerUiSlice = createSlice({
+  name: 'vendorCustomerUi',
   initialState,
   reducers: {
     setPage(state, action: PayloadAction<number>) {
@@ -91,6 +91,6 @@ export const {
   openDeleteDialog,
   closeDeleteDialog,
   resetFilters,
-} = customerUiSlice.actions;
+} = vendorCustomerUiSlice.actions;
 
-export default customerUiSlice.reducer;
+export default vendorCustomerUiSlice.reducer;

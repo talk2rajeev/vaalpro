@@ -6,6 +6,7 @@ import { useRefreshMutation, useValidateTokenMutation, useGetUserPermissionsQuer
 import { setCredentials, setPermissions, logout } from '@/features/auth/authSlice';
 import { Loader2 } from 'lucide-react';
 import { getDefaultRouteFromRealmRoles } from '@/features/auth/roleRouting';
+import { ROUTES } from '@/core/routes/paths';
 
 // Checks whether an RTK Query error is an HTTP 404
 const is404 = (error: unknown): boolean =>
@@ -159,7 +160,7 @@ const RequireAuth = () => {
   useEffect(() => {
     if (!accessToken || !realmRoles.length) return;
 
-    const isAccessingAdminZone = location.pathname.startsWith('/system-admin');
+    const isAccessingAdminZone = location.pathname.startsWith(ROUTES.systemAdmin.root);
     const defaultRoute = getDefaultRouteFromRealmRoles(realmRoles);
     const isPlatformAdmin = realmRoles.includes('PLATFORM_ADMIN');
     const isCustomerOrVendor =
@@ -167,7 +168,7 @@ const RequireAuth = () => {
       realmRoles.includes('VENDOR_USER');
 
     if (isPlatformAdmin) {
-      // Platform admins are restricted to the /system-admin ecosystem
+      // Platform admins are restricted to the system-admin ecosystem
       if (!isAccessingAdminZone) {
         navigate(defaultRoute, { replace: true });
       }
@@ -200,7 +201,7 @@ const RequireAuth = () => {
 
   // Session couldn't be restored. Remember where the uwer was headed so we can return them there after successful login.
   if (!accessToken && isAuthChecked) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to={ROUTES.login} state={{ from: location }} replace />;
   }
 
   return <Outlet />;

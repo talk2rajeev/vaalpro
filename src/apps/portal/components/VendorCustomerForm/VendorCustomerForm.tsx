@@ -11,8 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/core-components/dialog';
-import { useCreateCustomerMutation, useUpdateCustomerMutation } from '@/features/customers/vendorCustomerApi';
-import type { Customer } from '@/features/customers/customerTypes';
+import { useCreateVendorCustomerMutation, useUpdateVendorCustomerMutation } from '@/features/vendorCustomers/api';
+import type { VendorCustomer } from '@/features/vendorCustomers/types';
 
 const customerSchema = z.object({
   vendorSysId: z.string().trim().min(1, 'Vendor ID is required.'),
@@ -45,7 +45,7 @@ interface VendorCustomerFormProps {
   mode: 'create' | 'edit';
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  customer?: Customer | null;
+  customer?: VendorCustomer | null;
   vendorSysId?: string;
 }
 
@@ -57,7 +57,7 @@ const emptyCustomer: CustomerFormValues = {
   createdBy: '', remarks: '',
 };
 
-const getDefaultValues = (customer?: Customer | null, vendorSysId = ''): CustomerFormValues => customer ? {
+const getDefaultValues = (customer?: VendorCustomer | null, vendorSysId = ''): CustomerFormValues => customer ? {
   vendorSysId: customer.vendorSysId, customerLegalName: customer.customerLegalName,
   customerType: customer.customerType ?? '', customerStatus: customer.customerStatus ?? '',
   corporateNameCodeShort: customer.corporateNameCodeShort ?? '', website: customer.website ?? '',
@@ -81,8 +81,8 @@ const getErrorMessage = (error: unknown) => {
 
 const VendorCustomerForm = ({ mode, open, onOpenChange, customer, vendorSysId }: VendorCustomerFormProps) => {
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [createCustomer, { isLoading: isCreating }] = useCreateCustomerMutation();
-  const [updateCustomer, { isLoading: isUpdating }] = useUpdateCustomerMutation();
+  const [createVendorCustomer, { isLoading: isCreating }] = useCreateVendorCustomerMutation();
+  const [updateVendorCustomer, { isLoading: isUpdating }] = useUpdateVendorCustomerMutation();
   const { register, handleSubmit, formState: { errors, isValid }, reset } = useForm<CustomerFormValues>({
     resolver: zodResolver(customerSchema),
     defaultValues: getDefaultValues(customer, vendorSysId),
@@ -104,8 +104,8 @@ const VendorCustomerForm = ({ mode, open, onOpenChange, customer, vendorSysId }:
   const onSubmit = async (values: CustomerFormValues) => {
     setSaveError(null);
     try {
-      if (mode === 'create') await createCustomer(values).unwrap();
-      else if (customer) await updateCustomer({ customerSysId: customer.customerSysId, body: values }).unwrap();
+      if (mode === 'create') await createVendorCustomer(values).unwrap();
+      else if (customer) await updateVendorCustomer({ customerSysId: customer.customerSysId, body: values }).unwrap();
       handleOpenChange(false);
     } catch (error: unknown) {
       setSaveError(getErrorMessage(error));

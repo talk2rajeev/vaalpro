@@ -12,6 +12,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from '@/components/core-components/tooltip';
+import { ROUTES } from '@/core/routes/paths';
 
 interface MenuItem {
   label: string;
@@ -22,7 +23,7 @@ interface MenuItem {
 const menuItems: MenuItem[] = [
   {
     label: 'Vendors',
-    path: '/system-admin/vendors',
+    path: ROUTES.systemAdmin.vendors,
     icon: <Store size={20} />,
   },
   // {
@@ -42,7 +43,7 @@ const menuItems: MenuItem[] = [
   // },
   {
     label: 'Subscriptions',
-    path: '/system-admin/subscriptions',
+    path: ROUTES.systemAdmin.subscriptions,
     icon: <CreditCard size={20} />,
   },
 ];
