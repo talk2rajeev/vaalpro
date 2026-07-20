@@ -132,9 +132,9 @@ const VendorEmployeeManagementPage = () => {
 
           <AdminPageHeader
             className={hasVendorContext ? 'mt-4' : ''}
-            eyebrow="System Administration"
-            title="Vendor Employee Management"
-            description="Manage vendor employee accounts, role assignments, and access controls across the platform."
+            eyebrow={hasVendorContext ? 'Vendor Employees' : ''}
+            title={<span>{selectedVendor?.vendorName ? <strong>{selectedVendor.vendorName} </strong> : 'Manage Vendor Employees'}</span>}
+            description={<span>Manage <strong>{selectedVendor?.vendorName}</strong> employee accounts, role assignments, and access controls across the platform.</span>}
             action={(
               <Button
                 size="lg"
@@ -147,34 +147,6 @@ const VendorEmployeeManagementPage = () => {
               </Button>
             )}
           />
-
-          <InfoCard className="mt-8 p-4">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-500" htmlFor="vendor-employee-vendor">
-              Vendor
-            </label>
-            <div className="mt-2 flex flex-col gap-3 md:flex-row md:items-center">
-              {hasVendorContext ? (
-                <span className="text-sm text-slate-500">
-                  Managing employees for <span className="font-semibold text-slate-700">{selectedVendor?.vendorName ?? vendorId}</span>
-                </span>
-              ) : (
-                <select
-                  id="vendor-employee-vendor"
-                  value={selectedVendorSysId}
-                  onChange={(event) => handleVendorChange(event.target.value)}
-                  disabled={isLoadingVendors || isVendorError || !vendorsData?.content.length}
-                  className="min-h-9 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-medium text-slate-900 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 md:max-w-md"
-                >
-                  <option value="">Select vendor</option>
-                  {vendorsData?.content.map((vendor) => (
-                    <option key={vendor.vendorSysId} value={vendor.vendorSysId}>
-                      {vendor.vendorName}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
-          </InfoCard>
 
           {(isLoadingVendors || isLoadingRouteVendor) && <LoadingState label="Loading vendors..." />}
           {(isVendorError || isRouteVendorError) && (
