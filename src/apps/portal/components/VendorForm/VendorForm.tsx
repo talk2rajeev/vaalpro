@@ -11,8 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/core-components/dialog';
-import { useCreateVendorMutation, useUpdateVendorMutation } from '@/features/vendors/vendorApi';
-import type { Vendor } from '@/features/vendors/vendorTypes';
+import { useCreateVendorMutation, useUpdateVendorMutation } from '@/features/vendors/api';
+import type { Vendor } from '@/features/vendors/types';
 
 const vendorSchema = z.object({
   vendorCode: z.string().trim().min(1, 'Vendor code is required.'),

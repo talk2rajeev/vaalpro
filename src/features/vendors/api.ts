@@ -5,7 +5,7 @@ import type {
   VendorListParams,
   CreateVendorPayload,
   SearchVendorsParams,
-} from '@/features/vendors/vendorTypes';
+} from '@/features/vendors/types';
 
 export const vendorApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({

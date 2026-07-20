@@ -10,10 +10,11 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from '@/components/core-components/breadcrumb';
+} from '@/components/core-components/breadcrumb/breadcrumb';
 import VendorForm from '@/apps/portal/components/VendorForm/VendorForm';
-import { useGetVendorsQuery, useSearchVendorsQuery } from '@/features/vendors/vendorApi';
-import type { Vendor } from '@/features/vendors/vendorTypes';
+import { ROUTES } from '@/core/routes/paths';
+import { useGetVendorsQuery, useSearchVendorsQuery } from '@/features/vendors/api';
+import type { Vendor } from '@/features/vendors/types';
 
 const getErrorMessage = (error: unknown) => {
   if (typeof error === 'object' && error !== null && 'data' in error) {
@@ -82,20 +83,20 @@ const VendorManagementPage = () => {
         header: 'VENDOR NAME',
         cell: (info) => {
           const vendor = info.row.original;
-          const detailPath = `/system-admin/vendors/${vendor.vendorSysId}/detail`;
+          const detailPath = ROUTES.systemAdmin.vendorDetail(vendor.vendorSysId);
 
           return (
-          <a
-            href={detailPath}
-            onClick={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              navigate(detailPath, { state: { vendor } });
-            }}
-            className="font-semibold text-blue-800 hover:text-blue-700 hover:underline"
-          >
-            {info.getValue()}
-          </a>
+            <a
+              href={detailPath}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                navigate(detailPath, { state: { vendor } });
+              }}
+              className="font-semibold text-blue-800 hover:text-blue-700 hover:underline"
+            >
+              {info.getValue()}
+            </a>
           );
         },
       }),
@@ -143,7 +144,7 @@ const VendorManagementPage = () => {
             <h1 className="text-3xl font-bold tracking-tight">Vendors Hub</h1>
             <p className="mt-2 text-sm text-slate-700">Onboard, manage, and configure details of system vendors.</p>
           </div>
-          <Button className="h-9 shrink-0 bg-blue-800 px-4 text-white hover:bg-blue-900" onClick={() => setIsAdding(true)}>
+          <Button size="lg" className="shrink-0 px-4" onClick={() => setIsAdding(true)}>
             <Plus data-icon="inline-start" className="size-4" />
             Add New Vendor
           </Button>

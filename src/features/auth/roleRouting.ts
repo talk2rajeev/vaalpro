@@ -1,3 +1,5 @@
+import { ROUTES } from '@/core/routes/paths';
+
 export type MvpUserType = 'PLATFORM_ADMIN' | 'CUSTOMER_USER' | 'VENDOR_USER';
 
 export const getUserTypeFromRealmRoles = (realmRoles: string[]): MvpUserType => {
@@ -14,6 +16,6 @@ export const getUserTypeFromRealmRoles = (realmRoles: string[]): MvpUserType => 
 
 export const getDefaultRouteFromRealmRoles = (realmRoles: string[]) => {
   return getUserTypeFromRealmRoles(realmRoles) === 'PLATFORM_ADMIN'
-    ? '/system-admin'
-    : '/caaldoc/dashboard';
+    ? ROUTES.systemAdmin.root
+    : ROUTES.caaldoc.dashboard;
 };

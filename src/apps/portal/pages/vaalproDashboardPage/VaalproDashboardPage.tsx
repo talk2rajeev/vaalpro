@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import DashboardHeader from '@/apps/shared/components/DashboardHeader';
+import { ROUTES } from '@/core/routes/paths';
 
 
 type AppConfig = {
@@ -29,7 +30,7 @@ const apps: AppConfig[] = [
     description:
       'Automated calibration and maintenance workflows. Ensure instrumentation meets global regulatory compliance standards.',
     icon: Gauge,
-    route: '/caaldoc/dashboard',
+    route: ROUTES.caaldoc.dashboard,
     image: '/images/caaldoc-card.png',
     gradient: 'from-[#0F766E] via-[#11847D] to-[#21A99F]',
   },
@@ -40,7 +41,7 @@ const apps: AppConfig[] = [
     description:
       'End-to-end validation lifecycle management. Track document approvals and equipment calibration schedules in real time.',
     icon: FileCheck2,
-    route: '/vaaldoc',
+    route: ROUTES.vaaldoc,
     image: '/images/vaaldoc-card.png',
     gradient: 'from-[#163D73] via-[#1E4E8C] to-[#2E6FB5]',
   },
@@ -51,7 +52,7 @@ const apps: AppConfig[] = [
     description:
       'Quality management for protocol generation and peer-review audits. Centralize QMS and FDA-ready assets.',
     icon: ClipboardCheck,
-    route: '/dashboard',
+    route: ROUTES.qdoc.dashboard,
     image: '/images/qdoc.png',
     gradient: 'from-[#B96800] via-[#E88500] to-[#F6A92D]',
   },

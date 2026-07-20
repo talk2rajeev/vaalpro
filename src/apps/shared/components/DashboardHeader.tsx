@@ -6,6 +6,7 @@ import { DropdownMenu as DropdownMenuPrimitive } from 'radix-ui';
 import type { RootState } from '@/store/store';
 import { logout } from '@/features/auth/authSlice';
 import { getUserTypeFromRealmRoles } from '@/features/auth/roleRouting';
+import { ROUTES } from '@/core/routes/paths';
 
 const DashboardHeader: React.FC<{ showLogo?: boolean }> = ({ showLogo }) => {
   const navigate = useNavigate();
@@ -19,12 +20,12 @@ const DashboardHeader: React.FC<{ showLogo?: boolean }> = ({ showLogo }) => {
   const navigateToVaalpro = () => {
     const isPlatformAdmin = realmRoles.includes('PLATFORM_ADMIN');
 
-    navigate(isPlatformAdmin ? '/system-admin' : '/caaldoc/dashboard');
+    navigate(isPlatformAdmin ? ROUTES.systemAdmin.root : ROUTES.caaldoc.dashboard);
   };
 
   const handleLogout = () => {
     dispatch(logout());
-    navigate('/login', { replace: true });
+    navigate(ROUTES.login, { replace: true });
   };
 
   return (

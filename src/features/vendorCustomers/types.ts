@@ -1,4 +1,4 @@
-export interface Customer {
+export interface VendorCustomer {
   customerSysId: string;
   vendorSysId: string;
   customerLegalName: string;
@@ -24,8 +24,8 @@ export interface Customer {
   remarks?: string;
 }
 
-export interface CustomerPage {
-  content: Customer[];
+export interface VendorCustomerPage {
+  content: VendorCustomer[];
   pageNumber: number;
   pageSize: number;
   totalElements: number;
@@ -33,22 +33,22 @@ export interface CustomerPage {
   last: boolean;
 }
 
-export interface CustomerListParams {
+export interface VendorCustomerListParams {
   page: number;
   size: number;
   sortBy?: string;
   sortDir?: 'asc' | 'desc';
 }
 
-export type CreateCustomerPayload = Omit<Customer, 'customerSysId'>;
+export type CreateVendorCustomerPayload = Omit<VendorCustomer, 'customerSysId'>;
 
-export interface SearchCustomersParams {
+export interface SearchVendorCustomersParams {
   customerLegalName: string;
   page: number;
   size: number;
 }
 
-export interface CustomersByVendorParams {
+export interface VendorCustomersByVendorParams {
   vendorSysId: string;
   page: number;
   size: number;
