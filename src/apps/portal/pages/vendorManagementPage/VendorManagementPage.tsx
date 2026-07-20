@@ -1,16 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import { AlertCircle, Loader2, Plus, Search } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { Button } from '@/components/core-components/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/core-components/table';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/core-components/breadcrumb/breadcrumb';
+import AdminBreadcrumb from '@/apps/portal/components/AdminBreadcrumb/AdminBreadcrumb';
+import AdminPageHeader from '@/apps/portal/components/AdminPageHeader/AdminPageHeader';
+import AdminTableShell from '@/apps/portal/components/AdminTableShell/AdminTableShell';
+import { ErrorState, LoadingState } from '@/apps/portal/components/PageStates/PageStates';
+import StatusBadge from '@/apps/portal/components/StatusBadge/StatusBadge';
 import VendorForm from '@/apps/portal/components/VendorForm/VendorForm';
 import { ROUTES } from '@/core/routes/paths';
 import { useGetVendorsQuery, useSearchVendorsQuery } from '@/features/vendors/api';
@@ -115,11 +113,7 @@ const VendorManagementPage = () => {
       columnHelper.display({
         id: 'status',
         header: 'STATUS',
-        cell: () => (
-          <span className="rounded bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
-            Active
-          </span>
-        ),
+        cell: () => <StatusBadge tone="active">Active</StatusBadge>,
       }),
     ];
   }, [navigate]);
@@ -129,26 +123,19 @@ const VendorManagementPage = () => {
   return (
     <main className="min-h-screen bg-slate-50 p-8 text-slate-900">
       <section className="w-full">
-        <Breadcrumb>
-          <BreadcrumbList className="text-xs">
-            <BreadcrumbItem>Platform Admin</BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage className="font-bold text-blue-800">Vendors</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+        <AdminBreadcrumb items={[{ label: 'Platform Admin' }, { label: 'Vendors' }]} />
 
-        <div className="mt-3 flex items-start justify-between gap-6">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Vendors Hub</h1>
-            <p className="mt-2 text-sm text-slate-700">Onboard, manage, and configure details of system vendors.</p>
-          </div>
-          <Button size="lg" className="shrink-0 px-4" onClick={() => setIsAdding(true)}>
+        <AdminPageHeader
+          className="mt-3"
+          title="Vendors Hub"
+          description="Onboard, manage, and configure details of system vendors."
+          action={(
+            <Button size="lg" className="shrink-0 px-4" onClick={() => setIsAdding(true)}>
             <Plus data-icon="inline-start" className="size-4" />
             Add New Vendor
-          </Button>
-        </div>
+            </Button>
+          )}
+        />
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-sm font-bold text-slate-900">Select Vendor</h2>
@@ -166,7 +153,7 @@ const VendorManagementPage = () => {
         </div>
 
         {!isLoading && !isError && (
-          <div className="mt-4 overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm">
+          <AdminTableShell className="mt-4 border-slate-300">
             <Table>
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
@@ -202,24 +189,13 @@ const VendorManagementPage = () => {
                 )}
               </TableBody>
             </Table>
-          </div>
+          </AdminTableShell>
         )}
 
-        {isLoading && (
-          <div className="mt-4 flex min-h-[260px] items-center justify-center rounded-xl border border-slate-200 bg-white p-12 shadow-sm">
-            <Loader2 className="mr-3 size-8 animate-spin text-blue-600" />
-            <span className="text-lg font-medium text-slate-600">Loading vendors...</span>
-          </div>
-        )}
+        {isLoading && <LoadingState label="Loading vendors..." />}
 
         {isError && (
-          <div className="mt-4 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
-            <AlertCircle className="size-5 shrink-0" />
-            <div>
-              <p className="font-semibold">Failed to load vendors</p>
-              <p className="text-sm opacity-90">{getErrorMessage(error)}</p>
-            </div>
-          </div>
+          <ErrorState title="Failed to load vendors" message={getErrorMessage(error)} />
         )}
 
         {data && data.totalPages > 1 && (

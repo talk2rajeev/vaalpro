@@ -1,15 +1,10 @@
 import { useState } from 'react';
-import { Link } from 'react-router';
 import { Building2, Info, Map, Pencil, Users } from 'lucide-react';
 import { Button } from '@/components/core-components/button';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/core-components/breadcrumb/breadcrumb';
+import AdminBreadcrumb from '@/apps/portal/components/AdminBreadcrumb/AdminBreadcrumb';
+import AdminPageHeader from '@/apps/portal/components/AdminPageHeader/AdminPageHeader';
+import InfoCard from '@/apps/portal/components/InfoCard/InfoCard';
+import StatusBadge from '@/apps/portal/components/StatusBadge/StatusBadge';
 import DetailField from '@/apps/portal/components/VendorDetail/DetailField';
 import ManagementCard from '@/apps/portal/components/VendorDetail/ManagementCard';
 import VendorForm from '@/apps/portal/components/VendorForm/VendorForm';
@@ -48,47 +43,32 @@ const VendorDetailPage = () => {
 
   return (
     <main className="min-h-screen bg-slate-50 p-8 text-slate-900">
-      <Breadcrumb>
-        <BreadcrumbList className="text-xs">
-          <BreadcrumbItem>Platform Admin</BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link to={ROUTES.systemAdmin.vendors}>Vendors</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage className="font-bold text-blue-800">{vendor.vendorName}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+      <AdminBreadcrumb
+        items={[
+          { label: 'Platform Admin' },
+          { label: 'Vendors', to: ROUTES.systemAdmin.vendors },
+          { label: vendor.vendorName },
+        ]}
+      />
 
-      <div className="mt-5 flex items-start justify-between gap-6">
-        <div>
-          <span className="inline-flex rounded bg-blue-100 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-blue-800">
-            Active Vendor
-          </span>
-          <h1 className="mt-3 text-4xl font-bold tracking-tight">
+      <AdminPageHeader
+        className="mt-5"
+        badge={<StatusBadge tone="active" className="bg-blue-100 uppercase tracking-wide text-blue-800">Active Vendor</StatusBadge>}
+        title={(
+          <>
             {vendor.vendorName} <span className="font-normal text-slate-300">(Vendor Detail)</span>
-          </h1>
-        </div>
-        <Button
-          size="lg"
-          className="px-4"
-          onClick={() => setIsEditingVendor(true)}
-        >
-          <Pencil data-icon="inline-start" className="size-4" />
-          Edit Profile
-        </Button>
-      </div>
+          </>
+        )}
+        action={(
+          <Button size="lg" className="px-4" onClick={() => setIsEditingVendor(true)}>
+            <Pencil data-icon="inline-start" className="size-4" />
+            Edit Profile
+          </Button>
+        )}
+      />
 
-      <section className="mt-12 rounded-xl border border-slate-200 bg-white p-7 shadow-sm">
-        <div className="flex items-center gap-3 border-b border-slate-200 pb-5">
-          <Info className="size-5 text-blue-800" />
-          <h2 className="text-lg font-semibold">General Information</h2>
-        </div>
-        <div className="grid gap-x-16 gap-y-8 pt-7 md:grid-cols-3">
+      <InfoCard title="General Information" icon={<Info className="size-5 text-blue-800" />} className="mt-12">
+        <div className="grid gap-x-16 gap-y-8 md:grid-cols-3">
           <DetailField label="Vendor Name" value={vendor.vendorName} />
           <DetailField label="Vendor Code" value={vendor.vendorCode} />
           <DetailField label="Est. Year" value={String(vendor.yearEstablished)} />
@@ -102,7 +82,7 @@ const VendorDetailPage = () => {
           <DetailField label="PAN Number" value={vendor.panNumber} />
           <DetailField label="Logo URL (Optional)" value={vendor.logoUrl} />
         </div>
-      </section>
+      </InfoCard>
 
       <section className="mt-6 grid gap-6 lg:grid-cols-2">
         <ManagementCard
@@ -122,14 +102,15 @@ const VendorDetailPage = () => {
       </section>
 
       <section className="mt-6 grid gap-6 xl:grid-cols-[2fr_1fr]">
-        <div className="rounded-xl border border-slate-200 bg-white p-7 shadow-sm">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Recent Compliance Activity</h2>
+        <InfoCard
+          title="Recent Compliance Activity"
+          action={(
             <Button type="button" variant="link" className="h-auto p-0 font-semibold text-blue-800 hover:text-blue-600">
               View All
             </Button>
-          </div>
-          <div className="mt-6 overflow-hidden">
+          )}
+        >
+          <div className="overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-slate-100 text-left text-xs font-bold text-slate-500">
                 <tr>
@@ -144,27 +125,18 @@ const VendorDetailPage = () => {
                     <td className="px-5 py-4 font-medium">{activity.documentName}</td>
                     <td className="px-5 py-4 text-slate-600">{activity.expiryDate}</td>
                     <td className="px-5 py-4">
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${activity.status === 'VALID'
-                            ? 'bg-emerald-50 text-emerald-700'
-                            : 'bg-red-50 text-red-700'
-                          }`}
-                      >
+                      <StatusBadge tone={activity.status === 'VALID' ? 'valid' : 'expired'} className="rounded-full">
                         {activity.status}
-                      </span>
+                      </StatusBadge>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </div>
+        </InfoCard>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-7 shadow-sm">
-          <div className="mb-5 flex items-center gap-3">
-            <Map className="size-5 text-blue-800" />
-            <h2 className="text-lg font-semibold">Headquarters</h2>
-          </div>
+        <InfoCard title="Headquarters" icon={<Map className="size-5 text-blue-800" />}>
           <div className="relative h-56 overflow-hidden rounded-lg border border-slate-200 bg-blue-50">
             <div className="absolute inset-0 bg-[linear-gradient(30deg,rgba(30,64,175,0.18)_12%,transparent_12%,transparent_50%,rgba(30,64,175,0.18)_50%,rgba(30,64,175,0.18)_62%,transparent_62%),linear-gradient(120deg,rgba(15,23,42,0.12)_10%,transparent_10%,transparent_46%,rgba(15,23,42,0.12)_46%,rgba(15,23,42,0.12)_54%,transparent_54%)] bg-[length:72px_72px]" />
             <div className="absolute left-8 top-10 h-28 w-48 rotate-[-12deg] rounded-full border-2 border-blue-900/40" />
@@ -176,7 +148,7 @@ const VendorDetailPage = () => {
               </p>
             </div>
           </div>
-        </div>
+        </InfoCard>
       </section>
       <VendorForm
         mode="edit"
