@@ -24,9 +24,7 @@ type ValidateTokenResponse = {
   realmRoles: string[];
 };
 
-// Basic auth credential for the IAM validate-token introspection endpoint.
-// Move to a VITE_IAM_CLIENT_TOKEN env var if it ever needs to vary per environment.
-const IAM_CLIENT_BASIC = 'dmFhbGRvY19hcHA6aVFFajJrMkJiT0k4MVl2RGFtMHNBaWZoNlBaRXFuaUU=';
+const IAM_CLIENT_BASIC = import.meta.env.VITE_IAM_CLIENT_BASIC;
 
 export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -46,7 +44,7 @@ export const authApi = apiSlice.injectEndpoints({
         url: '/iam/validate-token',
         method: 'POST',
         headers: {
-          authorization: `Basic ${IAM_CLIENT_BASIC}`,
+          authorization: `Basic ${IAM_CLIENT_BASIC ?? ''}`,
           'content-type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({ token: accessToken }),
