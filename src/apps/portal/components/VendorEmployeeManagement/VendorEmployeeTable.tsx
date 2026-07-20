@@ -4,6 +4,8 @@ import { Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/core-components/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/core-components/table';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/core-components/tooltip';
+import AdminTableShell from '@/apps/portal/components/AdminTableShell/AdminTableShell';
+import StatusBadge from '@/apps/portal/components/StatusBadge/StatusBadge';
 import type { VendorEmployee } from '@/features/vendorEmployees/types';
 
 interface VendorEmployeeTableProps {
@@ -49,9 +51,9 @@ const VendorEmployeeTable = ({ employees, onEdit, onDelete }: VendorEmployeeTabl
         cell: (info) => {
           const isActive = info.getValue() === 'ACTIVE';
           return (
-            <span className={`rounded-full px-2 py-1 text-xs font-bold ${isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+            <StatusBadge tone={isActive ? 'active' : 'neutral'} className="rounded-full py-1 text-xs">
               {info.getValue()}
-            </span>
+            </StatusBadge>
           );
         },
       }),
@@ -97,7 +99,7 @@ const VendorEmployeeTable = ({ employees, onEdit, onDelete }: VendorEmployeeTabl
   const table = useReactTable({ data: employees, columns, getCoreRowModel: getCoreRowModel() });
 
   return (
-    <div className="mt-8 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <AdminTableShell className="mt-8">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -128,7 +130,7 @@ const VendorEmployeeTable = ({ employees, onEdit, onDelete }: VendorEmployeeTabl
           )}
         </TableBody>
       </Table>
-    </div>
+    </AdminTableShell>
   );
 };
 

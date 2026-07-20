@@ -1,16 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/core-components/button';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/core-components/breadcrumb/breadcrumb';
 import { TooltipProvider } from '@/components/core-components/tooltip';
+import AdminBreadcrumb from '@/apps/portal/components/AdminBreadcrumb/AdminBreadcrumb';
+import AdminPageHeader from '@/apps/portal/components/AdminPageHeader/AdminPageHeader';
+import InfoCard from '@/apps/portal/components/InfoCard/InfoCard';
 import DeleteVendorEmployeeDialog from '@/apps/portal/components/VendorEmployeeManagement/DeleteVendorEmployeeDialog';
 import { ErrorState, LoadingState } from '@/apps/portal/components/PageStates/PageStates';
 import VendorEmployeeForm from '@/apps/portal/components/VendorEmployeeManagement/VendorEmployeeForm';
@@ -126,51 +120,35 @@ const VendorEmployeeManagementPage = () => {
       <main className="min-h-screen bg-slate-50 p-8 text-slate-900">
         <section className="w-full">
           {hasVendorContext && (
-            <Breadcrumb>
-              <BreadcrumbList className="text-xs">
-                <BreadcrumbItem>Platform Admin</BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbLink asChild>
-                    <Link to={ROUTES.systemAdmin.vendors}>Vendors</Link>
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbLink asChild>
-                    <Link to={ROUTES.systemAdmin.vendorDetail(vendorId ?? '')}>
-                      {selectedVendor?.vendorName ?? vendorId}
-                    </Link>
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage className="font-bold text-blue-800">Employees</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
+            <AdminBreadcrumb
+              items={[
+                { label: 'Platform Admin' },
+                { label: 'Vendors', to: ROUTES.systemAdmin.vendors },
+                { label: selectedVendor?.vendorName ?? vendorId ?? '', to: ROUTES.systemAdmin.vendorDetail(vendorId ?? '') },
+                { label: 'Employees' },
+              ]}
+            />
           )}
 
-          <div className={`flex items-start justify-between gap-6 ${hasVendorContext ? 'mt-4' : ''}`}>
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">System Administration</p>
-              <h1 className="mt-2 text-3xl font-bold">Vendor Employee Management</h1>
-              <p className="mt-3 text-slate-600">
-                Manage vendor employee accounts, role assignments, and access controls across the platform.
-              </p>
-            </div>
-            <Button
-              size="lg"
-              className="shrink-0 px-4"
-              onClick={() => setIsAdding(true)}
-              disabled={!canManageEmployees}
-            >
-              <Plus data-icon="inline-start" className="size-4" />
-              Add Employee
-            </Button>
-          </div>
+          <AdminPageHeader
+            className={hasVendorContext ? 'mt-4' : ''}
+            eyebrow="System Administration"
+            title="Vendor Employee Management"
+            description="Manage vendor employee accounts, role assignments, and access controls across the platform."
+            action={(
+              <Button
+                size="lg"
+                className="shrink-0 px-4"
+                onClick={() => setIsAdding(true)}
+                disabled={!canManageEmployees}
+              >
+                <Plus data-icon="inline-start" className="size-4" />
+                Add Employee
+              </Button>
+            )}
+          />
 
-          <div className="mt-8 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <InfoCard className="mt-8 p-4">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-500" htmlFor="vendor-employee-vendor">
               Vendor
             </label>
@@ -196,7 +174,7 @@ const VendorEmployeeManagementPage = () => {
                 </select>
               )}
             </div>
-          </div>
+          </InfoCard>
 
           {(isLoadingVendors || isLoadingRouteVendor) && <LoadingState label="Loading vendors..." />}
           {(isVendorError || isRouteVendorError) && (
