@@ -16,26 +16,26 @@ import type { VendorCustomer } from '@/features/vendorCustomers/types';
 
 const customerSchema = z.object({
   vendorSysId: z.string().trim().min(1, 'Vendor ID is required.'),
-  customerLegalName: z.string().trim().min(1, 'Customer legal name is required.'),
+  legalName: z.string().trim().min(1, 'Customer legal name is required.'),
   customerType: z.string(),
-  customerStatus: z.string(),
-  corporateNameCodeShort: z.string(),
+  status: z.string(),
+  nameShortCode: z.string(),
   website: z.string().trim().refine((value) => !value || z.string().url().safeParse(value).success, 'Enter a valid URL.'),
   corporateEmail: z.string().trim().refine((value) => !value || z.string().email().safeParse(value).success, 'Enter a valid email.'),
   corporatePhone: z.string(),
   country: z.string(),
-  registeredAddress: z.string(),
-  corporateCity: z.string(),
-  corporateState: z.string(),
-  corporatePin: z.string(),
+  addressLine1: z.string(),
+  addressLine2: z.string(),
+  city: z.string(),
+  state: z.string(),
+  postalCode: z.string(),
   region: z.string(),
-  pan: z.string(),
-  gstinIfCentral: z.string(),
+  panNumber: z.string(),
+  gstNumber: z.string(),
   cin: z.string(),
   msmeStatus: z.string(),
   ndaRequired: z.boolean(),
   qualityAgreementRequired: z.boolean(),
-  createdBy: z.string(),
   remarks: z.string(),
 });
 
@@ -50,25 +50,26 @@ interface VendorCustomerFormProps {
 }
 
 const emptyCustomer: CustomerFormValues = {
-  vendorSysId: '', customerLegalName: '', customerType: '', customerStatus: '', corporateNameCodeShort: '',
-  website: '', corporateEmail: '', corporatePhone: '', country: '', registeredAddress: '',
-  corporateCity: '', corporateState: '', corporatePin: '', region: '', pan: '',
-  gstinIfCentral: '', cin: '', msmeStatus: '', ndaRequired: false, qualityAgreementRequired: false,
-  createdBy: '', remarks: '',
+  vendorSysId: '', legalName: '', customerType: '', status: '', nameShortCode: '',
+  website: '', corporateEmail: '', corporatePhone: '', country: '', addressLine1: '',
+  addressLine2: '', city: '', state: '', postalCode: '', region: '', panNumber: '',
+  gstNumber: '', cin: '', msmeStatus: '', ndaRequired: false, qualityAgreementRequired: false,
+  remarks: '',
 };
 
 const getDefaultValues = (customer?: VendorCustomer | null, vendorSysId = ''): CustomerFormValues => customer ? {
-  vendorSysId: customer.vendorSysId, customerLegalName: customer.customerLegalName,
-  customerType: customer.customerType ?? '', customerStatus: customer.customerStatus ?? '',
-  corporateNameCodeShort: customer.corporateNameCodeShort ?? '', website: customer.website ?? '',
+  vendorSysId: customer.vendorSysId, legalName: customer.legalName,
+  customerType: customer.customerType ?? '', status: customer.status ?? '',
+  nameShortCode: customer.nameShortCode ?? '', website: customer.website ?? '',
   corporateEmail: customer.corporateEmail ?? '', corporatePhone: customer.corporatePhone ?? '',
-  country: customer.country ?? '', registeredAddress: customer.registeredAddress ?? '',
-  corporateCity: customer.corporateCity ?? '', corporateState: customer.corporateState ?? '',
-  corporatePin: customer.corporatePin ?? '', region: customer.region ?? '',
-  pan: customer.pan ?? '', gstinIfCentral: customer.gstinIfCentral ?? '',
-  cin: customer.cin ?? '', msmeStatus: customer.msmeStatus ?? '',
-  ndaRequired: customer.ndaRequired ?? false, qualityAgreementRequired: customer.qualityAgreementRequired ?? false,
-  createdBy: customer.createdBy ?? '', remarks: customer.remarks ?? '',
+  country: customer.country ?? '', addressLine1: customer.addressLine1 ?? '',
+  addressLine2: customer.addressLine2 ?? '', city: customer.city ?? '',
+  state: customer.state ?? '', postalCode: customer.postalCode ?? '',
+  region: customer.region ?? '', panNumber: customer.panNumber ?? '',
+  gstNumber: customer.gstNumber ?? '', cin: customer.cin ?? '',
+  msmeStatus: customer.msmeStatus ?? '', ndaRequired: customer.ndaRequired ?? false,
+  qualityAgreementRequired: customer.qualityAgreementRequired ?? false,
+  remarks: customer.remarks ?? '',
 } : { ...emptyCustomer, vendorSysId };
 
 const getErrorMessage = (error: unknown) => {
@@ -105,7 +106,15 @@ const VendorCustomerForm = ({ mode, open, onOpenChange, customer, vendorSysId }:
     setSaveError(null);
     try {
       if (mode === 'create') await createVendorCustomer(values).unwrap();
-      else if (customer) await updateVendorCustomer({ customerSysId: customer.customerSysId, body: values }).unwrap();
+      else if (customer) await updateVendorCustomer({
+        customerSysId: customer.customerSysId,
+        body: {
+          ...values,
+          customerSysId: customer.customerSysId,
+          createdOn: customer.createdOn,
+          updatedOn: customer.updatedOn,
+        },
+      }).unwrap();
       handleOpenChange(false);
     } catch (error: unknown) {
       setSaveError(getErrorMessage(error));
@@ -134,24 +143,24 @@ const VendorCustomerForm = ({ mode, open, onOpenChange, customer, vendorSysId }:
       <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
         <div className="flex-1 overflow-y-auto border-y border-slate-100 px-6 py-4"><div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {field('Vendor ID', 'vendorSysId', { placeholder: 'e.g. vendor-sys-id' })}
-          {field('Customer Legal Name', 'customerLegalName', { wide: true, placeholder: 'e.g. Acme Industries Ltd' })}
+          {field('Legal Name', 'legalName', { wide: true, placeholder: 'e.g. Acme Industries Ltd' })}
           {field('Customer Type', 'customerType', { optional: true, placeholder: 'e.g. Corporate' })}
-          {field('Status', 'customerStatus', { optional: true, placeholder: 'e.g. Active' })}
-          {field('Corporate Code', 'corporateNameCodeShort', { optional: true, placeholder: 'e.g. ACME' })}
+          {field('Status', 'status', { optional: true, placeholder: 'e.g. Active' })}
+          {field('Name Short Code', 'nameShortCode', { optional: true, placeholder: 'e.g. ACME' })}
           {field('Website', 'website', { optional: true, placeholder: 'e.g. https://acme.com' })}
           {field('Corporate Email', 'corporateEmail', { optional: true, placeholder: 'e.g. contact@acme.com' })}
           {field('Corporate Phone', 'corporatePhone', { optional: true, placeholder: 'e.g. +1234567890' })}
-          {field('Registered Address', 'registeredAddress', { wide: true, optional: true, placeholder: 'e.g. 123 Business Park, Suite 500' })}
-          {field('City', 'corporateCity', { optional: true, placeholder: 'e.g. New York' })}
-          {field('State', 'corporateState', { optional: true, placeholder: 'e.g. NY' })}
-          {field('PIN Code', 'corporatePin', { optional: true, placeholder: 'e.g. 10001' })}
+          {field('Address Line 1', 'addressLine1', { wide: true, optional: true, placeholder: 'e.g. 123 Main St' })}
+          {field('Address Line 2', 'addressLine2', { wide: true, optional: true, placeholder: 'e.g. Suite 100' })}
+          {field('City', 'city', { optional: true, placeholder: 'e.g. New York' })}
+          {field('State', 'state', { optional: true, placeholder: 'e.g. NY' })}
+          {field('Postal Code', 'postalCode', { optional: true, placeholder: 'e.g. 10001' })}
           {field('Country', 'country', { optional: true, placeholder: 'e.g. USA' })}
           {field('Region', 'region', { optional: true, placeholder: 'e.g. North America' })}
-          {field('PAN', 'pan', { optional: true, placeholder: 'e.g. ABCDE1234F' })}
-          {field('GSTIN (Central)', 'gstinIfCentral', { optional: true, placeholder: 'e.g. 29ABCDE1234F1Z5' })}
+          {field('PAN Number', 'panNumber', { optional: true, placeholder: 'e.g. ABCDE1234F' })}
+          {field('GST Number', 'gstNumber', { optional: true, placeholder: 'e.g. 29ABCDE1234F1Z5' })}
           {field('CIN', 'cin', { optional: true, placeholder: 'e.g. L12345MH2023PTC123456' })}
           {field('MSME Status', 'msmeStatus', { optional: true, placeholder: 'e.g. Registered' })}
-          {field('Created By', 'createdBy', { optional: true, placeholder: 'e.g. admin' })}
           {field('Remarks', 'remarks', { wide: true, optional: true, placeholder: 'e.g. Initial customer setup' })}
           <div className="md:col-span-2 flex gap-8">
             {checkbox('NDA Required', 'ndaRequired')}

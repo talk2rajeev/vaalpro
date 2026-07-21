@@ -31,7 +31,7 @@ const DeleteVendorCustomerDialog = ({
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogDescription>
           Are you sure you want to delete{' '}
-          <span className="font-semibold text-slate-950">{customer?.customerLegalName}</span>? This action is
+          <span className="font-semibold text-slate-950">{customer?.legalName}</span>? This action is
           permanent.
         </DialogDescription>
       </DialogHeader>
