@@ -10,12 +10,12 @@ import AdminTableShell from '@/apps/portal/components/AdminTableShell/AdminTable
 import { ErrorState, LoadingState } from '@/apps/portal/components/PageStates/PageStates';
 import StatusBadge from '@/apps/portal/components/StatusBadge/StatusBadge';
 import DeleteVendorCustomerDialog from '@/apps/portal/components/VendorCustomerManagement/DeleteVendorCustomerDialog';
+import VendorCustomerDetailModal from '@/apps/portal/components/VendorCustomerManagement/VendorCustomerDetailModal';
 import VendorCustomerForm from '@/apps/portal/components/VendorCustomerForm/VendorCustomerForm';
 import { ROUTES } from '@/core/routes/paths';
 import { useVendorContext } from '@/features/vendors/useVendorContext';
 import {
   useDeleteVendorCustomerMutation,
-  useGetVendorCustomersByVendorQuery,
   useGetVendorCustomersQuery,
 } from '@/features/vendorCustomers/api';
 import type { VendorCustomer } from '@/features/vendorCustomers/types';
@@ -31,20 +31,18 @@ const getErrorMessage = (error: unknown) => {
 const VendorCustomerManagementPage = () => {
   const { vendorId, hasVendorContext, vendor } = useVendorContext();
   const [page, setPage] = useState(0);
-  const [editingCustomer, setEditingCustomer] = useState<VendorCustomer | null>(null);
+  const [viewingCustomer, setViewingCustomer] = useState<VendorCustomer | null>(null);
   const [deletingCustomer, setDeletingCustomer] = useState<VendorCustomer | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const pageSize = 10;
-  const customersQuery = useGetVendorCustomersQuery(
-    { page, size: pageSize, sortBy: 'customerSysId', sortDir: 'asc' },
-    { skip: hasVendorContext },
-  );
-  const vendorCustomersQuery = useGetVendorCustomersByVendorQuery(
-    { vendorSysId: vendorId ?? '', page, size: pageSize, sortBy: 'customerSysId', sortDir: 'asc' },
-    { skip: !hasVendorContext },
-  );
-  const { data, isLoading, isError, error } = hasVendorContext ? vendorCustomersQuery : customersQuery;
+  const { data, isLoading, isError, error } = useGetVendorCustomersQuery({
+    ...(hasVendorContext && vendorId ? { vendorSysId: vendorId } : {}),
+    page,
+    size: pageSize,
+    sortBy: 'customerSysId',
+    sortDir: 'asc',
+  });
   const [deleteVendorCustomer, { isLoading: isDeleting }] = useDeleteVendorCustomerMutation();
 
   const handleDeleteClick = useCallback((customer: VendorCustomer) => {
@@ -67,20 +65,20 @@ const VendorCustomerManagementPage = () => {
   const columns = useMemo(() => {
     const columnHelper = createColumnHelper<VendorCustomer>();
     return [
-      columnHelper.accessor('customerLegalName', { header: 'Customer Name', cell: (info) => <span className="font-semibold text-slate-800">{info.getValue()}</span> }),
+      columnHelper.accessor('legalName', { header: 'Customer Name', cell: (info) => <span className="font-semibold text-slate-800">{info.getValue()}</span> }),
       columnHelper.accessor('customerType', { header: 'Type', cell: (info) => <span className="text-slate-600">{info.getValue() ?? '—'}</span> }),
-      columnHelper.accessor('customerStatus', {
+      columnHelper.accessor('status', {
         header: 'Status',
-        cell: (info) => <StatusBadge tone={info.getValue() === 'ACTIVE' ? 'active' : 'neutral'}>{info.getValue() ?? '—'}</StatusBadge>,
+        cell: (info) => <StatusBadge tone={info.getValue() === 'Active' ? 'active' : 'neutral'}>{info.getValue() ?? '—'}</StatusBadge>,
       }),
-      columnHelper.accessor('corporateNameCodeShort', { header: 'Code', cell: (info) => <span className="font-mono text-xs font-bold text-slate-700">{info.getValue() ?? '—'}</span> }),
-      columnHelper.accessor('corporateCity', { header: 'Location', cell: (info) => <span className="text-slate-600">{[info.row.original.corporateCity, info.row.original.corporateState, info.row.original.country].filter(Boolean).join(', ') || '—'}</span> }),
+      columnHelper.accessor('nameShortCode', { header: 'Code', cell: (info) => <span className="font-mono text-xs font-bold text-slate-700">{info.getValue() ?? '—'}</span> }),
+      columnHelper.accessor('city', { header: 'Location', cell: (info) => <span className="text-slate-600">{[info.row.original.city, info.row.original.state, info.row.original.country].filter(Boolean).join(', ') || '—'}</span> }),
       columnHelper.accessor('corporateEmail', { header: 'Email', cell: (info) => <span className="text-slate-600 text-sm">{info.getValue() ?? '—'}</span> }),
       columnHelper.accessor('corporatePhone', { header: 'Phone', cell: (info) => <span className="font-mono text-xs text-slate-600">{info.getValue() ?? '—'}</span> }),
       columnHelper.display({
         id: 'actions', header: () => <div className="text-right pr-4">Actions</div>,
         cell: (info) => <div className="flex items-center justify-end gap-2 pr-2">
-          <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon-sm" onClick={() => setEditingCustomer(info.row.original)} className="text-slate-500 hover:text-blue-600"><Pencil className="size-4.5" /><span className="sr-only">Edit Customer</span></Button></TooltipTrigger><TooltipContent side="right">Edit Customer</TooltipContent></Tooltip>
+          <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon-sm" onClick={() => setViewingCustomer(info.row.original)} className="text-slate-500 hover:text-blue-600"><Pencil className="size-4.5" /><span className="sr-only">View/Edit Customer</span></Button></TooltipTrigger><TooltipContent side="right">View/Edit Customer</TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon-sm" onClick={() => handleDeleteClick(info.row.original)} className="text-slate-500 hover:text-red-600"><Trash2 className="size-4.5" /><span className="sr-only">Delete Customer</span></Button></TooltipTrigger><TooltipContent side="right">Delete Customer</TooltipContent></Tooltip>
         </div>,
       }),
@@ -184,12 +182,10 @@ const VendorCustomerManagementPage = () => {
         </section>
 
         <VendorCustomerForm mode="create" open={isAdding} vendorSysId={vendorId} onOpenChange={setIsAdding} />
-        <VendorCustomerForm
-          mode="edit"
-          open={editingCustomer !== null}
-          customer={editingCustomer}
-          vendorSysId={vendorId}
-          onOpenChange={(open) => !open && setEditingCustomer(null)}
+        <VendorCustomerDetailModal
+          open={viewingCustomer !== null}
+          customer={viewingCustomer}
+          onOpenChange={(open) => !open && setViewingCustomer(null)}
         />
         <DeleteVendorCustomerDialog
           customer={deletingCustomer}

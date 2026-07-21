@@ -1,27 +1,29 @@
 export interface VendorCustomer {
   customerSysId: string;
   vendorSysId: string;
-  customerLegalName: string;
+  legalName: string;
   customerType?: string;
-  customerStatus?: string;
-  corporateNameCodeShort?: string;
+  status?: string;
+  nameShortCode?: string;
   website?: string;
   corporateEmail?: string;
   corporatePhone?: string;
   country?: string;
-  registeredAddress?: string;
-  corporateCity?: string;
-  corporateState?: string;
-  corporatePin?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
   region?: string;
-  pan?: string;
-  gstinIfCentral?: string;
+  panNumber?: string;
+  gstNumber?: string;
   cin?: string;
   msmeStatus?: string;
   ndaRequired?: boolean;
   qualityAgreementRequired?: boolean;
-  createdBy?: string;
   remarks?: string;
+  createdOn?: string;
+  updatedOn?: string;
 }
 
 export interface VendorCustomerPage {
@@ -34,24 +36,17 @@ export interface VendorCustomerPage {
 }
 
 export interface VendorCustomerListParams {
+  vendorSysId?: string;
   page: number;
   size: number;
   sortBy?: string;
   sortDir?: 'asc' | 'desc';
 }
 
-export type CreateVendorCustomerPayload = Omit<VendorCustomer, 'customerSysId'>;
+export type CreateVendorCustomerPayload = Omit<VendorCustomer, 'customerSysId' | 'createdOn' | 'updatedOn'>;
 
 export interface SearchVendorCustomersParams {
   customerLegalName: string;
   page: number;
   size: number;
-}
-
-export interface VendorCustomersByVendorParams {
-  vendorSysId: string;
-  page: number;
-  size: number;
-  sortBy?: string;
-  sortDir?: 'asc' | 'desc';
 }
